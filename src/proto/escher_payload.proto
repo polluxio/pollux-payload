@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option go_package = "mangrove/private/grpc";
+
+package mangrove;
+
+service EscherJob {
+  rpc Send(EscherMessage) returns (EscherMessageResponse) {}
+}
+
+service EscherPayload {
+  rpc Ready(EscherReadyMessage) returns (EscherReadyResponse) {}
+  rpc Receive(EscherMessage) returns (EscherMessageResponse) {}
+}
+
+message EscherReadyMessage {
+  string info = 1;
+}
+
+message EscherReadyResponse {
+  string info = 1;
+}
+
+message EscherMessage {
+  repeated uint32 destinations = 1;
+  string key = 2;
+  string value = 3;
+}
+
+message EscherMessageResponse {
+  string info = 1;
+}
