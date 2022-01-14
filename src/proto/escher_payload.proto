@@ -4,21 +4,17 @@ option go_package = "mangrove/private/grpc";
 
 package mangrove;
 
-service EscherJob {
-  rpc Send(EscherMessage) returns (EscherMessageResponse) {}
-}
-
+//Escher server from Payload side
 service EscherPayload {
-  rpc Ready(EscherReadyMessage) returns (EscherReadyResponse) {}
   rpc Receive(EscherMessage) returns (EscherMessageResponse) {}
+  rpc Terminate(PayloadTerminateMessage) returns (PayloadTerminateResponse) {}
 }
 
-message EscherReadyMessage {
-  string info = 1;
-}
-
-message EscherReadyResponse {
-  string info = 1;
+//Escher server from Job side
+service EscherJob {
+  rpc PayloadReady(PayloadReadyMessage) returns (PayloadReadyResponse) {}
+  rpc PayloadInactive(PayloadInactiveMessage) returns (PayloadInactiveResponse) {}
+  rpc Receive(EscherMessage) returns (EscherMessageResponse) {}
 }
 
 message EscherMessage {
@@ -29,4 +25,29 @@ message EscherMessage {
 
 message EscherMessageResponse {
   string info = 1;
+}
+
+message PayloadReadyMessage {
+  string info = 1;
+  uint32 port = 2;
+}
+
+message PayloadReadyResponse {
+  string info = 1;
+}
+
+message PayloadInactiveMessage {
+  string info = 1;
+  uint64 since = 2;
+}
+
+message PayloadInactiveResponse {
+  string info = 1;
+}
+
+message PayloadTerminateMessage {
+  string info = 1;
+}
+
+message PayloadTerminateResponse {
 }
