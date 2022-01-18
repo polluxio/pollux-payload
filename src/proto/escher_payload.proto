@@ -4,9 +4,11 @@ option go_package = "mangrove/private/grpc";
 
 package mangrove;
 
+import "escher.proto";
+
 //Escher server from Payload side
 service EscherPayload {
-  rpc Receive(EscherMessage) returns (EscherMessageResponse) {}
+  rpc EscherCommunication(EscherMessage) returns (EscherMessageResponse) {}
   rpc Terminate(PayloadTerminateMessage) returns (PayloadTerminateResponse) {}
 }
 
@@ -14,17 +16,7 @@ service EscherPayload {
 service EscherJob {
   rpc PayloadReady(PayloadReadyMessage) returns (PayloadReadyResponse) {}
   rpc PayloadInactive(PayloadInactiveMessage) returns (PayloadInactiveResponse) {}
-  rpc Receive(EscherMessage) returns (EscherMessageResponse) {}
-}
-
-message EscherMessage {
-  repeated uint32 destinations = 1;
-  string key = 2;
-  string value = 3;
-}
-
-message EscherMessageResponse {
-  string info = 1;
+  rpc EscherCommunication(EscherMessage) returns (EscherMessageResponse) {}
 }
 
 message PayloadReadyMessage {

@@ -7,19 +7,29 @@ import concurrent
 import socket
 import threading
 import time
+import random
 
 import grpc
+import escher_pb2
 import escher_payload_pb2
 import escher_payload_pb2_grpc
 
 timeOut = 10
 class EscherPayloadServicer(escher_payload_pb2_grpc.EscherPayloadServicer):
+  def __init__(self, terminate_event):
+    self.terminate_event = terminate_event
+    
   def Terminate(self, request, context):
     logging.info("Received terminate")
+    self.terminate_event.set()
     return escher_payload_pb2.PayloadTerminateResponse()
 
-def sendPayloadDone(stub):
-  logging.info("-------------- sendPayloadDone --------------")
+  def EscherCommunication(self, request, context):
+    logging.info("Escher Message received: key=%s, value=%s"% (request.key, request.value))
+    return escher_pb2.EscherMessageResponse()
+
+def sendPayloadInactive(stub):
+  logging.info("-------------- sendPayloadInactive --------------")
   inactiveMessage = escher_payload_pb2.PayloadInactiveMessage(info="I'm hungry !!")
   try:
     response = stub.PayloadInactive(inactiveMessage, timeout=timeOut)
@@ -27,12 +37,31 @@ def sendPayloadDone(stub):
     logging.error('grpc unavailable error: %s', rpc_error)
   logging.info("Received: " + str(response))
 
-def mainLoop(stub):
+def sendEscherCommunication(stub, other_id):
+  logging.info("-------------- sendEscherCommunication --------------")
+  logging.info("Send message to " + str(other_id))
+  escherMessage = escher_pb2.EscherMessage(destinations=[other_id], key="hello", value="hello")
+  try:
+    response = stub.EscherCommunication(escherMessage)
+  except grpc.RpcError as rpc_error:
+    logging.error('grpc unavailable error: %s', rpc_error)
+  logging.info("Send response: " + str(response))
+
+def mainLoop(stub, other_ids):
   logging.info("-------------- Starting main loop --------------")
   #wait for 20 secs
-  time.sleep(20)
+  time.sleep(5)
+  other_id = random.choice(other_ids)
+  sendEscherCommunication(stub, other_id)
+  time.sleep(5)
+  other_id = random.choice(other_ids)
+  sendEscherCommunication(stub, other_id)
+  time.sleep(5)
+  other_id = random.choice(other_ids)
+  sendEscherCommunication(stub, other_id)
+  time.sleep(5)
   #send to master that I'm done
-  sendPayloadDone(stub)
+  sendPayloadInactive(stub)
 
 def sendPayloadReady(stub, localPort):
   logging.info("-------------- sendPayloadReady --------------")
@@ -40,26 +69,27 @@ def sendPayloadReady(stub, localPort):
   response = stub.PayloadReady(readyMessage)
   logging.info("Sign of life: " + str(response))
   
-def run(masterJobPort):
+def run(masterJobPort, other_ids):
   address = 'localhost:' + masterJobPort
   sock = socket.socket()
   sock.bind(('', 0))
   localPort = sock.getsockname()[1]
   server = grpc.server(concurrent.futures.ThreadPoolExecutor(max_workers=10))
-  escher_payload_pb2_grpc.add_EscherPayloadServicer_to_server(EscherPayloadServicer(), server)
+  terminate_event = threading.Event()
+  escher_payload_pb2_grpc.add_EscherPayloadServicer_to_server(EscherPayloadServicer(terminate_event), server)
   server.add_insecure_port('[::]:' + str(localPort))
   server.start()
   with grpc.insecure_channel(address) as channel:
     stub = escher_payload_pb2_grpc.EscherJobStub(channel)
     sendPayloadReady(stub, localPort)
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-      future = executor.submit(mainLoop, stub)
+      future = executor.submit(mainLoop, stub, other_ids)
   
-  main = threading.Thread(target=mainLoop, args=(address))
-  main.start()
-  
-
-  server.wait_for_termination()
+  logging.info("Waiting for terminate_event")
+  terminate_event.wait()
+  logging.info("Received terminate_event")
+  server.stop(5)
+  logging.info("server stopped")
 
 class ArgumentParser(argparse.ArgumentParser):
   def error(self, message):
@@ -69,26 +99,33 @@ class ArgumentParser(argparse.ArgumentParser):
     logging.error(self.prog + ': ' + message)
     self.exit(2, '%s: error: %s\n' % (self.prog, message))
 
-if __name__ == '__main__':
+def main() -> int:
+  parser = ArgumentParser(prog='escher_payload', exit_on_error=False)
+  parser.add_argument("--port", required=True, help="escher port")
+  parser.add_argument("--id", required=True, help="escher payload id")
+
+  args = parser.parse_args()
+
+  logName = 'escher-payload-' + str(args.id) + '.log' 
   logging.basicConfig(
-            filename='escher_payload.log', filemode='w',
+            filename=logName, filemode='w',
             level=logging.DEBUG,
             format='%(asctime)s %(levelname)-8s %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S')
 
   logging.info("########################################################")
-
-  parser = ArgumentParser(prog='escher_payload', exit_on_error=False)
-  parser.add_argument("--port", required=True, help="escher port")
-  parser.add_argument("--id", default=-10, help="escher payload id")
-
-  args = parser.parse_args()
-
-  argStr = "uninitialized"
-  if args.id != -1:
-    argStr = str(args.id)
-  logging.info("escher payload id: " + argStr)
+  logging.info(logName)
   logging.info("########################################################")
 
   logging.info("command line arguments:" + ''.join(" " + s  for s in sys.argv[1:]))
-  run(args.port)
+
+  other_ids = [0, 1, 2]
+  other_ids.remove(int(args.id))
+  logging.info("other_ids: " + ''.join(" " + str(i) for i in other_ids))
+
+  run(args.port, other_ids)
+  logging.info("payload " + argStr + " terminated")
+  return 0
+
+if __name__ == '__main__':
+  sys.exit(main())  # next section explains the use of sys.exit

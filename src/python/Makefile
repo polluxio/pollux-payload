@@ -3,6 +3,7 @@
 #
 
 all:
+	python3 -m grpc_tools.protoc -I../proto --python_out=. --grpc_python_out=. ../proto/escher.proto
 	python3 -m grpc_tools.protoc -I../proto --python_out=. --grpc_python_out=. ../proto/escher_payload.proto
 
 clean:

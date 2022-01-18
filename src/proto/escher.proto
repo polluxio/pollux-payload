@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "mangrove/private/grpc";
+
+package mangrove;
+
+message EscherMessage {
+  repeated uint32 destinations = 1;
+  string key = 2;
+  string value = 3;
+}
+
+message EscherMessageResponse {
+  string info = 1;
+}
