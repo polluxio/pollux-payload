@@ -25,7 +25,7 @@ class EscherPayloadServicer(escher_payload_pb2_grpc.EscherPayloadServicer):
     return escher_payload_pb2.PayloadTerminateResponse()
 
   def EscherCommunication(self, request, context):
-    logging.info("Escher Message received: key=%s, value=%s"% (request.key, request.value))
+    logging.info("Escher Message received: origin={}, destinations={}, key={}, value={}".format(request.origin, request.destinations, request.key, request.value))
     return escher_pb2.EscherMessageResponse()
 
 def sendPayloadInactive(stub):
@@ -37,28 +37,28 @@ def sendPayloadInactive(stub):
     logging.error('grpc unavailable error: %s', rpc_error)
   logging.info("Received: " + str(response))
 
-def sendEscherCommunication(stub, other_id):
+def sendEscherCommunication(stub, local_id, other_id):
   logging.info("-------------- sendEscherCommunication --------------")
-  logging.info("Send message to " + str(other_id))
-  escherMessage = escher_pb2.EscherMessage(destinations=[other_id], key="hello", value="hello")
+  logging.info("Send message from {} to {}".format(local_id, other_id))
+  escherMessage = escher_pb2.EscherMessage(origin=local_id, destinations=[other_id], key="hello", value="hello")
   try:
-    response = stub.EscherCommunication(escherMessage)
+    response = stub.EscherCommunication(escherMessage, timeout=timeOut)
   except grpc.RpcError as rpc_error:
     logging.error('grpc unavailable error: %s', rpc_error)
   logging.info("Send response: " + str(response))
 
-def mainLoop(stub, other_ids):
+def mainLoop(stub, local_id, other_ids):
   logging.info("-------------- Starting main loop --------------")
   #wait for 20 secs
   time.sleep(5)
   other_id = random.choice(other_ids)
-  sendEscherCommunication(stub, other_id)
+  sendEscherCommunication(stub, local_id, other_id)
   time.sleep(5)
   other_id = random.choice(other_ids)
-  sendEscherCommunication(stub, other_id)
+  sendEscherCommunication(stub, local_id, other_id)
   time.sleep(5)
   other_id = random.choice(other_ids)
-  sendEscherCommunication(stub, other_id)
+  sendEscherCommunication(stub, local_id, other_id)
   time.sleep(5)
   #send to master that I'm done
   sendPayloadInactive(stub)
@@ -69,7 +69,7 @@ def sendPayloadReady(stub, localPort):
   response = stub.PayloadReady(readyMessage)
   logging.info("Sign of life: " + str(response))
   
-def run(masterJobPort, other_ids):
+def run(masterJobPort, local_id, other_ids):
   address = 'localhost:' + masterJobPort
   sock = socket.socket()
   sock.bind(('', 0))
@@ -83,7 +83,7 @@ def run(masterJobPort, other_ids):
     stub = escher_payload_pb2_grpc.EscherJobStub(channel)
     sendPayloadReady(stub, localPort)
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-      future = executor.submit(mainLoop, stub, other_ids)
+      future = executor.submit(mainLoop, stub, local_id, other_ids)
   
   logging.info("Waiting for terminate_event")
   terminate_event.wait()
@@ -123,9 +123,9 @@ def main() -> int:
   other_ids.remove(int(args.id))
   logging.info("other_ids: " + ''.join(" " + str(i) for i in other_ids))
 
-  run(args.port, other_ids)
+  run(args.port, int(args.id), other_ids)
   logging.info("payload " + argStr + " terminated")
   return 0
 
 if __name__ == '__main__':
-  sys.exit(main())  # next section explains the use of sys.exit
+  sys.exit(main())
