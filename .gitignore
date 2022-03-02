@@ -1,0 +1,7 @@
+*~
+*.pyc
+*.log
+src/python/escher_payload_pb2_grpc.py
+src/python/escher_payload_pb2.py
+src/python/escher_pb2_grpc.py
+src/python/escher_pb2.py
