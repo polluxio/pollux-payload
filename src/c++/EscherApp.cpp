@@ -2,8 +2,9 @@
 #include <getopt.h>
 
 #include <grpcpp/create_channel.h>
+#include <grpcpp/server_builder.h>
 
-#include "escher_payload.pb.h"
+#include "escher_payload.grpc.pb.h"
 
 namespace {
 
@@ -15,8 +16,78 @@ void printHelp() {
   exit(1);
 }
 
-class EscherClient {
+class EscherPayloadService final : public escher::EscherPayload::Service {
+  public:
+    grpc::Status Terminate(
+      grpc::ServerContext* context,
+      const escher::PayloadTerminateMessage* messsage, 
+      escher::PayloadTerminateResponse* response) override {
+      //Terminate local app
+      //should the server be gracefully shutdown ??  
+      return grpc::Status::OK;
+    }
+
+    grpc::Status EscherCommunication(
+      grpc::ServerContext* context,
+      const escher::EscherMessage* message,
+      escher::EscherMessageResponse* response) override {
+        std::cout << "Escher Message received: "
+          << "origin=" << message->origin()
+          << ", key=" << message->key()
+          << ", value=" << message->value()
+          << std::endl;
+        return grpc::Status::OK;
+      }
 };
+
+void runServer() {
+  std::string server_address("0.0.0.0:50051");
+  EscherPayloadService service;
+  grpc::ServerBuilder builder;
+  builder.RegisterService(&service);
+  std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+  std::cout << "Server listening on " << server_address << std::endl;
+  server->Wait();
+}
+
+class EscherPayloadClient {
+  public:
+    EscherPayloadClient(std::shared_ptr<grpc::Channel> channel)
+      : stub_(escher::EscherJob::NewStub(channel))
+    {}
+
+    void sendPayloadReady(int port) {
+      grpc::ClientContext context;
+      escher::PayloadReadyMessage request;
+      request.set_info("I'm alive", port);
+      escher::PayloadReadyResponse response;
+      grpc::Status status = stub_->PayloadReady(&context, request, &response);
+    }
+
+  private:
+    std::unique_ptr<escher::EscherJob::Stub> stub_;
+};
+
+int getAvailablePort() {
+  //FIXME
+  return 0;
+}
+
+void run(int masterPort, int payloadID) {
+  std::string address("localhost");
+  address += address + ":" + std::to_string(masterPort);
+  
+  //create local server
+
+
+  EscherPayloadClient client(
+    grpc::CreateChannel(address, grpc::InsecureChannelCredentials())
+  );
+
+  int port = getAvailablePort();
+  //I'm alive send message
+  client.sendPayloadReady(port);
+}
 
 }
 
@@ -63,15 +134,13 @@ int main(int argc, char **argv) {
     printHelp();
   }
 
-  {
-    //I'm alive send message
-    std::string address("localhost");
-    address += address + ":" + std::to_string(port);
-    grpc::CreateChannel(address, grpc::InsecureChannelCredentials());
-  }
+  //FIXME
+  //create log file
+  //
+
+  run(port, id);
 
   // Optional:  Delete all global objects allocated by libprotobuf.
   google::protobuf::ShutdownProtobufLibrary();
-
   return 0;
 }
