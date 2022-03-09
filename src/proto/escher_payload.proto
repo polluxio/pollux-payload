@@ -9,11 +9,12 @@ import "escher.proto";
 //Escher server from Payload side
 service EscherPayload {
   rpc EscherCommunication(EscherMessage) returns (EscherMessageResponse) {}
+  rpc Start(PayloadStartMessage) returns (PayloadStartResponse) {}
   rpc Terminate(PayloadTerminateMessage) returns (PayloadTerminateResponse) {}
 }
 
-//Escher server from Job side
-service EscherJob {
+//Escher Payload server from Escherlet side
+service EscherletPayload {
   rpc PayloadReady(PayloadReadyMessage) returns (PayloadReadyResponse) {}
   rpc PayloadInactive(PayloadInactiveMessage) returns (PayloadInactiveResponse) {}
   rpc EscherCommunication(EscherMessage) returns (EscherMessageResponse) {}
@@ -22,6 +23,7 @@ service EscherJob {
 message PayloadReadyMessage {
   string info = 1;
   uint32 port = 2;
+  escher.EscherVersion version = 3;
 }
 
 message PayloadReadyResponse {
@@ -34,6 +36,14 @@ message PayloadInactiveMessage {
 }
 
 message PayloadInactiveResponse {
+  string info = 1;
+}
+
+message PayloadStartMessage {
+  string info = 1;
+}
+
+message PayloadStartResponse {
   string info = 1;
 }
 

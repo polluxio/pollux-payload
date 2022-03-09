@@ -1,3 +1,4 @@
+.vscode
 *~
 *.pyc
 *.log
@@ -7,3 +8,4 @@ src/python/escher_pb2_grpc.py
 src/python/escher_pb2.py
 build
 .*.swp
+src/c++/EscherApp.cpp

@@ -1,5 +1,10 @@
-#include <iostream>
 #include <getopt.h>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <thread>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 #include <grpcpp/create_channel.h>
 #include <grpcpp/server_builder.h>
@@ -7,6 +12,18 @@
 #include "escher_payload.grpc.pb.h"
 
 namespace {
+
+std::ofstream logFile;
+
+class Logger {
+  public:
+    static void info(const std::string& message) {
+      logFile << message << std::endl;
+    }
+    static void error(const std::string& message) {
+      logFile << message << std::endl;
+    }
+};
 
 void printHelp() {
   std::cout
@@ -27,66 +44,105 @@ class EscherPayloadService final : public escher::EscherPayload::Service {
       return grpc::Status::OK;
     }
 
+    grpc::Status Start(
+      grpc::ServerContext* context,
+      const escher::PayloadStartMessage* messsage, 
+      escher::PayloadStartResponse* response) override {
+      Logger::info("Start payload received");
+      return grpc::Status::OK;
+    }
+
     grpc::Status EscherCommunication(
       grpc::ServerContext* context,
       const escher::EscherMessage* message,
       escher::EscherMessageResponse* response) override {
-        std::cout << "Escher Message received: "
+        std::ostringstream logMessage;
+        logMessage << "Escher Message received: "
           << "origin=" << message->origin()
           << ", key=" << message->key()
-          << ", value=" << message->value()
-          << std::endl;
+          << ", value=" << message->value();
+        Logger::info(logMessage.str());
         return grpc::Status::OK;
       }
 };
 
-void runServer() {
-  std::string server_address("0.0.0.0:50051");
-  EscherPayloadService service;
-  grpc::ServerBuilder builder;
-  builder.RegisterService(&service);
-  std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-  std::cout << "Server listening on " << server_address << std::endl;
-  server->Wait();
-}
-
-class EscherPayloadClient {
+class EscherletPayloadClient {
   public:
-    EscherPayloadClient(std::shared_ptr<grpc::Channel> channel)
-      : stub_(escher::EscherJob::NewStub(channel))
+    EscherletPayloadClient(
+      std::shared_ptr<grpc::Channel> channel,
+      int id,
+      int port):
+        stub_(escher::EscherletPayload::NewStub(channel)),
+        id_(id),
+        port_(port)
     {}
 
     void sendPayloadReady(int port) {
       grpc::ClientContext context;
       escher::PayloadReadyMessage request;
-      request.set_info("I'm alive", port);
+      request.set_info("I'm alive from: " + std::to_string(id_));
+      request.set_port(port);
       escher::PayloadReadyResponse response;
       grpc::Status status = stub_->PayloadReady(&context, request, &response);
+      if (not status.ok()) {
+        Logger::error("Error while sending \"sendPayloadReady\": " + status.error_message());
+        exit(-54);
+      }
+      Logger::info("Received " + response.info());
+    }
+
+    void escherCommunication() {
+      grpc::ClientContext context;
+      escher::EscherMessage message;
+      escher::EscherMessageResponse response;
+      grpc::Status status = stub_->EscherCommunication(&context, message, &response);
     }
 
   private:
-    std::unique_ptr<escher::EscherJob::Stub> stub_;
+    std::unique_ptr<escher::EscherletPayload::Stub> stub_;
+    int                                             id_;
+    int                                             port_;
 };
 
 int getAvailablePort() {
-  //FIXME
-  return 0;
+  int sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (sock == -1) {
+    return -1;
+  }
+
+  int port = 0; //get next available port
+  struct sockaddr_in sin;
+
+  sin.sin_port = htons(port);
+  sin.sin_addr.s_addr = 0;
+  sin.sin_addr.s_addr = INADDR_ANY;
+  sin.sin_family = AF_INET;
+
+  if (bind(sock, (struct sockaddr *)&sin, sizeof(struct sockaddr_in)) == -1) {
+    if (errno == EADDRINUSE) {
+      std::cerr << "Port in use" << std::endl;
+      return -1;
+    }
+    std::cerr << "Current port: " << ntohs(sin.sin_port) << std::endl;
+  }
+
+  {
+    struct sockaddr_in sin;
+    socklen_t len = sizeof(sin);
+    if (getsockname(sock, (struct sockaddr *)&sin, &len) != -1) {
+      Logger::info("port number " + std::to_string((sin.sin_port)));
+      return ntohs(sin.sin_port);
+    }
+  }
+  return -1;
 }
 
-void run(int masterPort, int payloadID) {
-  std::string address("localhost");
-  address += address + ":" + std::to_string(masterPort);
-  
-  //create local server
+void sendEscherCommunication(EscherletPayloadClient* client) {
+  client->escherCommunication();
+}
 
-
-  EscherPayloadClient client(
-    grpc::CreateChannel(address, grpc::InsecureChannelCredentials())
-  );
-
-  int port = getAvailablePort();
-  //I'm alive send message
-  client.sendPayloadReady(port);
+void mainLoop(EscherletPayloadClient* client) {
+  sendEscherCommunication(client);
 }
 
 }
@@ -102,7 +158,7 @@ int main(int argc, char **argv) {
     {nullptr, no_argument,        nullptr,  0}
   };
 
-  int port = -1;
+  int masterPort = -1;
   int id = -1;
 
   while (true) {
@@ -113,7 +169,7 @@ int main(int argc, char **argv) {
 
     switch (opt) {
       case 'p':
-        port = std::stoi(optarg);
+        masterPort = std::stoi(optarg);
         break;
       case 'i':
         id = std::stoi(optarg);
@@ -125,7 +181,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  if (port == -1) {
+  if (masterPort == -1) {
     std::cout << "port argument is mandatory" << std::endl;
     printHelp();
   }
@@ -134,13 +190,55 @@ int main(int argc, char **argv) {
     printHelp();
   }
 
-  //FIXME
-  //create log file
-  //
+  std::string logFileName("escher-app-" + std::to_string(id) + ".log");
+  std::filesystem::path logFilePath(logFileName);
+  logFile.open(logFilePath);
+  Logger::info("########################################################");
+  Logger::info(logFileName);
+  Logger::info("########################################################");
 
-  run(port, id);
+  int localPort = getAvailablePort();
+  std::string address("localhost");
+  address += ":" + std::to_string(masterPort);
+  Logger::info("creating local client");
+  EscherletPayloadClient client(
+    grpc::CreateChannel(address, grpc::InsecureChannelCredentials()),
+    id,
+    localPort
+  );
+
+  Logger::info("contacting escherlet on " + address + " and sending ready message");
+  //I'm alive send message
+  client.sendPayloadReady(localPort);
+
+  //std::thread mainLoopThread(&mainLoop, &client);
+  //mainLoopThread.join();
+
+  //create and run local server
+  Logger::info("starting server on " + std::to_string(localPort));
+  std::string serverAddress("localhost:");
+  serverAddress += std::to_string(localPort);
+  EscherPayloadService service;
+  grpc::ServerBuilder builder;
+  builder.AddListeningPort(serverAddress, grpc::InsecureServerCredentials());
+  builder.RegisterService(&service);
+  std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+  { 
+    std::ostringstream message;
+    message << "Server listening on " << serverAddress;
+    Logger::info(message.str());
+  }
+  server->Wait(); //blocking
+
+  //we get there if EscherPayloadService was terminated
+  {
+    std::ostringstream message;
+    message << "Server " << serverAddress << " terminated";
+    Logger::info(message.str());
+  }
 
   // Optional:  Delete all global objects allocated by libprotobuf.
   google::protobuf::ShutdownProtobufLibrary();
+  Logger::info("End of " + logFileName);
   return 0;
 }
