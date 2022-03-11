@@ -14,6 +14,8 @@
 namespace {
 
 std::ofstream logFile;
+int localID = 0;
+std::vector<int> otherIDs = {0, 1, 2};
 
 class Logger {
   public:
@@ -32,39 +34,6 @@ void printHelp() {
     << "--help:     Displays this help" << std::endl;
   exit(1);
 }
-
-class EscherPayloadService final : public escher::EscherPayload::Service {
-  public:
-    grpc::Status Terminate(
-      grpc::ServerContext* context,
-      const escher::PayloadTerminateMessage* messsage, 
-      escher::PayloadTerminateResponse* response) override {
-      //Terminate local app
-      //should the server be gracefully shutdown ??  
-      return grpc::Status::OK;
-    }
-
-    grpc::Status Start(
-      grpc::ServerContext* context,
-      const escher::PayloadStartMessage* messsage, 
-      escher::PayloadStartResponse* response) override {
-      Logger::info("Start payload received");
-      return grpc::Status::OK;
-    }
-
-    grpc::Status EscherCommunication(
-      grpc::ServerContext* context,
-      const escher::EscherMessage* message,
-      escher::EscherMessageResponse* response) override {
-        std::ostringstream logMessage;
-        logMessage << "Escher Message received: "
-          << "origin=" << message->origin()
-          << ", key=" << message->key()
-          << ", value=" << message->value();
-        Logger::info(logMessage.str());
-        return grpc::Status::OK;
-      }
-};
 
 class EscherletPayloadClient {
   public:
@@ -88,20 +57,90 @@ class EscherletPayloadClient {
         Logger::error("Error while sending \"sendPayloadReady\": " + status.error_message());
         exit(-54);
       }
-      Logger::info("Received " + response.info());
+      Logger::info("PayloadReady::Response: " + response.info());
     }
 
-    void escherCommunication() {
+    void escherCommunication(int id, const std::string& key, const std::string& value) {
       grpc::ClientContext context;
       escher::EscherMessage message;
+      message.set_origin(localID);
+      message.add_destinations(id);
+      message.set_key(key);
+      message.set_value(value);
       escher::EscherMessageResponse response;
       grpc::Status status = stub_->EscherCommunication(&context, message, &response);
+      Logger::info("EscherCommunication::Response: " + response.info());
+    }
+
+    std::string getString() const {
+      return "EscherletPayloadClient id: " + std::to_string(id_) + " port: " + std::to_string(port_);
     }
 
   private:
     std::unique_ptr<escher::EscherletPayload::Stub> stub_;
     int                                             id_;
     int                                             port_;
+};
+
+void sendEscherCommunication(
+  EscherletPayloadClient* client,
+  int destination,
+  const std::string& key,
+  const std::string& value) {
+  client->escherCommunication(destination, key, value);
+}
+
+void mainLoop(EscherletPayloadClient* client) {
+  Logger::info("Main loop started");
+  while(1) {
+    sleep(5);
+    int pick = rand() % otherIDs.size();
+    int id = otherIDs[pick];
+    Logger::info("Send communication to: " + std::to_string(id) + " from: " + std::to_string(localID));
+    sendEscherCommunication(client, id, "key", "value");
+  }
+}
+
+class EscherPayloadService final : public escher::EscherPayload::Service {
+  public:
+    EscherPayloadService() = delete;
+    EscherPayloadService(const EscherPayloadService&) = delete;
+    EscherPayloadService(EscherletPayloadClient* client): escherletClient_(client) {}
+    grpc::Status Terminate(
+      grpc::ServerContext* context,
+      const escher::PayloadTerminateMessage* messsage, 
+      escher::PayloadTerminateResponse* response) override {
+      //Terminate local app
+      //should the server be gracefully shutdown ??  
+      return grpc::Status::OK;
+    }
+
+    grpc::Status Start(
+      grpc::ServerContext* context,
+      const escher::PayloadStartMessage* messsage, 
+      escher::PayloadStartResponse* response) override {
+      Logger::info("Start payload received");
+      std::thread mainLoopThread(mainLoop, escherletClient_);
+      mainLoopThread.detach();
+      response->set_info("Payload has been started");
+      return grpc::Status::OK;
+    }
+
+    grpc::Status EscherCommunication(
+      grpc::ServerContext* context,
+      const escher::EscherMessage* message,
+      escher::EscherMessageResponse* response) override {
+      std::ostringstream logMessage;
+      logMessage << "Escher Message received: "
+        << "origin=" << message->origin()
+        << ", key=" << message->key()
+        << ", value=" << message->value();
+      Logger::info(logMessage.str());
+      response->set_info(logMessage.str() + " understood");
+      return grpc::Status::OK;
+    }
+  private:
+    EscherletPayloadClient* escherletClient_ {nullptr};
 };
 
 int getAvailablePort() {
@@ -135,14 +174,6 @@ int getAvailablePort() {
     }
   }
   return -1;
-}
-
-void sendEscherCommunication(EscherletPayloadClient* client) {
-  client->escherCommunication();
-}
-
-void mainLoop(EscherletPayloadClient* client) {
-  sendEscherCommunication(client);
 }
 
 }
@@ -190,6 +221,11 @@ int main(int argc, char **argv) {
     printHelp();
   }
 
+  localID = id;
+
+  //HACK: should this be transmitted as app arg ?
+  otherIDs.erase(std::remove(otherIDs.begin(), otherIDs.end(), localID), otherIDs.end());
+
   std::string logFileName("escher-app-" + std::to_string(id) + ".log");
   std::filesystem::path logFilePath(logFileName);
   logFile.open(logFilePath);
@@ -203,7 +239,7 @@ int main(int argc, char **argv) {
   Logger::info("creating local client");
   EscherletPayloadClient client(
     grpc::CreateChannel(address, grpc::InsecureChannelCredentials()),
-    id,
+    localID,
     localPort
   );
 
@@ -211,16 +247,18 @@ int main(int argc, char **argv) {
   //I'm alive send message
   client.sendPayloadReady(localPort);
 
-  //std::thread mainLoopThread(&mainLoop, &client);
-  //mainLoopThread.join();
-
   //create and run local server
   Logger::info("starting server on " + std::to_string(localPort));
   std::string serverAddress("localhost:");
   serverAddress += std::to_string(localPort);
-  EscherPayloadService service;
+  EscherPayloadService service(&client);
   grpc::ServerBuilder builder;
   builder.AddListeningPort(serverAddress, grpc::InsecureServerCredentials());
+  //Explore the following later
+  //builder.AddChannelArgument(GRPC_ARG_KEEPALIVE_TIME_MS, 2000);
+  //builder.AddChannelArgument(GRPC_ARG_KEEPALIVE_TIMEOUT_MS, 1000);
+  //builder.AddChannelArgument(GRPC_ARG_HTTP2_BDP_PROBE, 1);
+  //builder.AddChannelArgument(GRPC_ARG_MAX_CONNECTION_IDLE_MS , 1000);
   builder.RegisterService(&service);
   std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
   { 
