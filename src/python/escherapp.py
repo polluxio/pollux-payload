@@ -100,13 +100,13 @@ class ArgumentParser(argparse.ArgumentParser):
     self.exit(2, '%s: error: %s\n' % (self.prog, message))
 
 def main() -> int:
-  parser = ArgumentParser(prog='escher_payload', exit_on_error=False)
+  parser = ArgumentParser(prog='escherapp', exit_on_error=False)
   parser.add_argument("--port", required=True, help="escher port")
   parser.add_argument("--id", required=True, help="escher payload id")
 
   args = parser.parse_args()
 
-  logName = 'escher-payload-' + str(args.id) + '.log' 
+  logName = 'escherapp' + str(args.id) + '.log' 
   logging.basicConfig(
             filename=logName, filemode='w',
             level=logging.DEBUG,

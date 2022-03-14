@@ -3,6 +3,7 @@
 #include <sstream>
 #include <fstream>
 #include <thread>
+#include <numeric>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -14,8 +15,7 @@
 namespace {
 
 std::ofstream logFile;
-int localID = 0;
-std::vector<int> otherIDs = {0, 1, 2};
+std::vector<int> otherIDs;
 
 class Logger {
   public:
@@ -29,9 +29,10 @@ class Logger {
 
 void printHelp() {
   std::cout
-    << "--port <p>: Escher master port" << std::endl
-    << "--id <id>:  Escher payload id" << std::endl
-    << "--help:     Displays this help" << std::endl;
+    << "--port <p>:         Escher master port" << std::endl
+    << "--id <id>:          Escher payload id" << std::endl
+    << "--partitions <nb>:  Global number of partitions" << std::endl 
+    << "--help:             Displays this help and exit" << std::endl;
   exit(1);
 }
 
@@ -48,9 +49,12 @@ class EscherletPayloadClient {
 
     void sendPayloadReady(int port) {
       grpc::ClientContext context;
+      //escher::EscherVersion version;
+      //version.set_version(escher::EscherVersion_Version::EscherVersion_Version_CURRENT);
       escher::PayloadReadyMessage request;
       request.set_info("I'm alive from: " + std::to_string(id_));
       request.set_port(port);
+      //request.set_allocated_version(&version);
       escher::PayloadReadyResponse response;
       grpc::Status status = stub_->PayloadReady(&context, request, &response);
       if (not status.ok()) {
@@ -63,7 +67,7 @@ class EscherletPayloadClient {
     void escherCommunication(int id, const std::string& key, const std::string& value) {
       grpc::ClientContext context;
       escher::EscherMessage message;
-      message.set_origin(localID);
+      message.set_origin(id_);
       message.add_destinations(id);
       message.set_key(key);
       message.set_value(value);
@@ -96,7 +100,6 @@ void mainLoop(EscherletPayloadClient* client) {
     sleep(5);
     int pick = rand() % otherIDs.size();
     int id = otherIDs[pick];
-    Logger::info("Send communication to: " + std::to_string(id) + " from: " + std::to_string(localID));
     sendEscherCommunication(client, id, "key", "value");
   }
 }
@@ -181,16 +184,18 @@ int getAvailablePort() {
 int main(int argc, char **argv) {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-  const char* const short_opts = "pi:h::";
+  const char* const short_opts = "pin:h::";
   const option long_opts[] = {
-    {"port",  required_argument,  0,        'p'},
-    {"id",    required_argument,  0,        'i'},
-    {"help" , no_argument,        nullptr,  'h'},
-    {nullptr, no_argument,        nullptr,  0}
+    {"port",        required_argument,  0,        'p'},
+    {"id",          required_argument,  0,        'i'},
+    {"partitions",  required_argument,  0,        'n'},
+    {"help" ,       no_argument,        nullptr,  'h'},
+    {nullptr,       no_argument,        nullptr,  0}
   };
 
   int masterPort = -1;
   int id = -1;
+  int partitions = -1;
 
   while (true) {
     const auto opt = getopt_long(argc, argv, short_opts, long_opts, nullptr);
@@ -205,8 +210,12 @@ int main(int argc, char **argv) {
       case 'i':
         id = std::stoi(optarg);
         break;
+      case 'n':
+        partitions = std::stoi(optarg);
+        break;
       case 'h':
       default:
+        std::cout << opt << " is not a recognized option, recognized options are:" << std::endl;
         printHelp();
         break;
     }
@@ -221,9 +230,9 @@ int main(int argc, char **argv) {
     printHelp();
   }
 
-  localID = id;
-
-  //HACK: should this be transmitted as app arg ?
+  int localID = id;
+  otherIDs = std::vector<int>(partitions);
+  std::iota(otherIDs.begin(), otherIDs.end(), 0);
   otherIDs.erase(std::remove(otherIDs.begin(), otherIDs.end(), localID), otherIDs.end());
 
   std::string logFileName("escher-app-" + std::to_string(id) + ".log");
