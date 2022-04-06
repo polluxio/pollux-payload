@@ -1,3 +1,3 @@
-add_executable(escherapp EscherApp.cpp)
+add_executable(polluxapp PolluxApp.cpp)
 
-target_link_libraries(escherapp escher_grpc)
+target_link_libraries(polluxapp pollux_grpc)

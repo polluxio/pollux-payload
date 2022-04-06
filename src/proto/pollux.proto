@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-option go_package = "escher/private/grpc";
+option go_package = "pollux/private/grpc";
 
-package escher;
+package pollux;
 
-message EscherVersion {
+message PolluxVersion {
   enum Version {
     DUMMY = 0;
     CURRENT = 1;
@@ -12,13 +12,13 @@ message EscherVersion {
   Version version = 1;
 }
 
-message EscherMessage {
+message PolluxMessage {
   uint32 origin  = 1;
   repeated uint32 destinations = 2;
   string key = 3;
   string value = 4;
 }
 
-message EscherMessageResponse {
+message PolluxMessageResponse {
   string info = 1;
 }

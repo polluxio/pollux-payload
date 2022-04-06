@@ -1,6 +1,6 @@
 cmake_policy(SET CMP0048 NEW)
 
-project(escherapp)
+project(polluxapp)
 
 cmake_minimum_required(VERSION 3.22)
 

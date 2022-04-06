@@ -1,29 +1,29 @@
 syntax = "proto3";
 
-option go_package = "escher/private/grpc";
+option go_package = "pollux/private/grpc";
 
-package escher;
+package pollux;
 
-import "escher.proto";
+import "pollux.proto";
 
-//Escher server from Payload side
-service EscherPayload {
-  rpc EscherCommunication(EscherMessage) returns (EscherMessageResponse) {}
+//Pollux server from Payload side
+service PolluxPayload {
+  rpc PolluxCommunication(PolluxMessage) returns (PolluxMessageResponse) {}
   rpc Start(PayloadStartMessage) returns (PayloadStartResponse) {}
   rpc Terminate(PayloadTerminateMessage) returns (PayloadTerminateResponse) {}
 }
 
-//Escher Payload server from Escherlet side
-service EscherletPayload {
+//Pollux Payload server from Polluxlet side
+service PolluxletPayload {
   rpc PayloadReady(PayloadReadyMessage) returns (PayloadReadyResponse) {}
   rpc PayloadInactive(PayloadInactiveMessage) returns (PayloadInactiveResponse) {}
-  rpc EscherCommunication(EscherMessage) returns (EscherMessageResponse) {}
+  rpc PolluxCommunication(PolluxMessage) returns (PolluxMessageResponse) {}
 }
 
 message PayloadReadyMessage {
   string info = 1;
   uint32 port = 2;
-  escher.EscherVersion version = 3;
+  pollux.PolluxVersion version = 3;
 }
 
 message PayloadReadyResponse {

@@ -1,4 +1,4 @@
-# escherapp
-Escher application example
+# polluxapp
+Pollux application example
 ## Introduction
-escherapp provides examples of applications using the Escher tool.
+polluxapp provides examples of applications using the Pollux tool.

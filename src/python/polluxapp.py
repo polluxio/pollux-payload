@@ -10,39 +10,39 @@ import time
 import random
 
 import grpc
-import escher_pb2
-import escher_payload_pb2
-import escher_payload_pb2_grpc
+import pollux_pb2
+import pollux_payload_pb2
+import pollux_payload_pb2_grpc
 
 timeOut = 10
-class EscherPayloadServicer(escher_payload_pb2_grpc.EscherPayloadServicer):
+class PolluxPayloadServicer(pollux_payload_pb2_grpc.PolluxPayloadServicer):
   def __init__(self, terminate_event):
     self.terminate_event = terminate_event
     
   def Terminate(self, request, context):
     logging.info("Received terminate")
     self.terminate_event.set()
-    return escher_payload_pb2.PayloadTerminateResponse()
+    return pollux_payload_pb2.PayloadTerminateResponse()
 
-  def EscherCommunication(self, request, context):
-    logging.info("Escher Message received: origin={}, destinations={}, key={}, value={}".format(request.origin, request.destinations, request.key, request.value))
-    return escher_pb2.EscherMessageResponse()
+  def PolluxCommunication(self, request, context):
+    logging.info("Pollux Message received: origin={}, destinations={}, key={}, value={}".format(request.origin, request.destinations, request.key, request.value))
+    return pollux_pb2.PolluxMessageResponse()
 
 def sendPayloadInactive(stub):
   logging.info("-------------- sendPayloadInactive --------------")
-  inactiveMessage = escher_payload_pb2.PayloadInactiveMessage(info="I'm hungry !!")
+  inactiveMessage = pollux_payload_pb2.PayloadInactiveMessage(info="I'm hungry !!")
   try:
     response = stub.PayloadInactive(inactiveMessage, timeout=timeOut)
   except grpc.RpcError as rpc_error:
     logging.error('grpc unavailable error: %s', rpc_error)
   logging.info("Received: " + str(response))
 
-def sendEscherCommunication(stub, local_id, other_id):
-  logging.info("-------------- sendEscherCommunication --------------")
+def sendPolluxCommunication(stub, local_id, other_id):
+  logging.info("-------------- sendPolluxCommunication --------------")
   logging.info("Send message from {} to {}".format(local_id, other_id))
-  escherMessage = escher_pb2.EscherMessage(origin=local_id, destinations=[other_id], key="hello", value="hello")
+  polluxMessage = pollux_pb2.PolluxMessage(origin=local_id, destinations=[other_id], key="hello", value="hello")
   try:
-    response = stub.EscherCommunication(escherMessage, timeout=timeOut)
+    response = stub.PolluxCommunication(polluxMessage, timeout=timeOut)
   except grpc.RpcError as rpc_error:
     logging.error('grpc unavailable error: %s', rpc_error)
   logging.info("Send response: " + str(response))
@@ -52,20 +52,20 @@ def mainLoop(stub, local_id, other_ids):
   #wait for 20 secs
   time.sleep(5)
   other_id = random.choice(other_ids)
-  sendEscherCommunication(stub, local_id, other_id)
+  sendPolluxCommunication(stub, local_id, other_id)
   time.sleep(5)
   other_id = random.choice(other_ids)
-  sendEscherCommunication(stub, local_id, other_id)
+  sendPolluxCommunication(stub, local_id, other_id)
   time.sleep(5)
   other_id = random.choice(other_ids)
-  sendEscherCommunication(stub, local_id, other_id)
+  sendPolluxCommunication(stub, local_id, other_id)
   time.sleep(5)
   #send to master that I'm done
   sendPayloadInactive(stub)
 
 def sendPayloadReady(stub, localPort):
   logging.info("-------------- sendPayloadReady --------------")
-  readyMessage = escher_payload_pb2.PayloadReadyMessage(info="I'm alive", port=localPort);
+  readyMessage = pollux_payload_pb2.PayloadReadyMessage(info="I'm alive", port=localPort);
   response = stub.PayloadReady(readyMessage)
   logging.info("Sign of life: " + str(response))
   
@@ -76,11 +76,11 @@ def run(masterJobPort, local_id, other_ids):
   localPort = sock.getsockname()[1]
   server = grpc.server(concurrent.futures.ThreadPoolExecutor(max_workers=10))
   terminate_event = threading.Event()
-  escher_payload_pb2_grpc.add_EscherPayloadServicer_to_server(EscherPayloadServicer(terminate_event), server)
+  pollux_payload_pb2_grpc.add_PolluxPayloadServicer_to_server(PolluxPayloadServicer(terminate_event), server)
   server.add_insecure_port('[::]:' + str(localPort))
   server.start()
   with grpc.insecure_channel(address) as channel:
-    stub = escher_payload_pb2_grpc.EscherJobStub(channel)
+    stub = pollux_payload_pb2_grpc.PolluxJobStub(channel)
     sendPayloadReady(stub, localPort)
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
       future = executor.submit(mainLoop, stub, local_id, other_ids)
@@ -100,13 +100,13 @@ class ArgumentParser(argparse.ArgumentParser):
     self.exit(2, '%s: error: %s\n' % (self.prog, message))
 
 def main() -> int:
-  parser = ArgumentParser(prog='escherapp', exit_on_error=False)
-  parser.add_argument("--port", required=True, help="escher port")
-  parser.add_argument("--id", required=True, help="escher payload id")
+  parser = ArgumentParser(prog='polluxapp', exit_on_error=False)
+  parser.add_argument("--port", required=True, help="pollux port")
+  parser.add_argument("--id", required=True, help="pollux payload id")
 
   args = parser.parse_args()
 
-  logName = 'escherapp' + str(args.id) + '.log' 
+  logName = 'polluxapp' + str(args.id) + '.log' 
   logging.basicConfig(
             filename=logName, filemode='w',
             level=logging.DEBUG,

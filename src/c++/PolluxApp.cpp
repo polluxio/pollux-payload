@@ -10,7 +10,7 @@
 #include <grpcpp/create_channel.h>
 #include <grpcpp/server_builder.h>
 
-#include "escher_payload.grpc.pb.h"
+#include "pollux_payload.grpc.pb.h"
 
 namespace {
 
@@ -29,33 +29,33 @@ class Logger {
 
 void printHelp() {
   std::cout
-    << "--port <p>:         Escher master port" << std::endl
-    << "--id <id>:          Escher payload id" << std::endl
+    << "--port <p>:         Pollux master port" << std::endl
+    << "--id <id>:          Pollux payload id" << std::endl
     << "--partitions <nb>:  Global number of partitions" << std::endl 
     << "--help:             Displays this help and exit" << std::endl;
   exit(1);
 }
 
-class EscherletPayloadClient {
+class PolluxletPayloadClient {
   public:
-    EscherletPayloadClient(
+    PolluxletPayloadClient(
       std::shared_ptr<grpc::Channel> channel,
       int id,
       int port):
-        stub_(escher::EscherletPayload::NewStub(channel)),
+        stub_(pollux::PolluxletPayload::NewStub(channel)),
         id_(id),
         port_(port)
     {}
 
     void sendPayloadReady(int port) {
       grpc::ClientContext context;
-      //escher::EscherVersion version;
-      //version.set_version(escher::EscherVersion_Version::EscherVersion_Version_CURRENT);
-      escher::PayloadReadyMessage request;
+      //pollux::PolluxVersion version;
+      //version.set_version(pollux::PolluxVersion_Version::PolluxVersion_Version_CURRENT);
+      pollux::PayloadReadyMessage request;
       request.set_info("I'm alive from: " + std::to_string(id_));
       request.set_port(port);
       //request.set_allocated_version(&version);
-      escher::PayloadReadyResponse response;
+      pollux::PayloadReadyResponse response;
       grpc::Status status = stub_->PayloadReady(&context, request, &response);
       if (not status.ok()) {
         Logger::error("Error while sending \"sendPayloadReady\": " + status.error_message());
@@ -64,55 +64,55 @@ class EscherletPayloadClient {
       Logger::info("PayloadReady::Response: " + response.info());
     }
 
-    void escherCommunication(int id, const std::string& key, const std::string& value) {
+    void polluxCommunication(int id, const std::string& key, const std::string& value) {
       grpc::ClientContext context;
-      escher::EscherMessage message;
+      pollux::PolluxMessage message;
       message.set_origin(id_);
       message.add_destinations(id);
       message.set_key(key);
       message.set_value(value);
-      escher::EscherMessageResponse response;
-      grpc::Status status = stub_->EscherCommunication(&context, message, &response);
-      Logger::info("EscherCommunication::Response: " + response.info());
+      pollux::PolluxMessageResponse response;
+      grpc::Status status = stub_->PolluxCommunication(&context, message, &response);
+      Logger::info("PolluxCommunication::Response: " + response.info());
     }
 
     std::string getString() const {
-      return "EscherletPayloadClient id: " + std::to_string(id_) + " port: " + std::to_string(port_);
+      return "PolluxletPayloadClient id: " + std::to_string(id_) + " port: " + std::to_string(port_);
     }
 
   private:
-    std::unique_ptr<escher::EscherletPayload::Stub> stub_;
+    std::unique_ptr<pollux::PolluxletPayload::Stub> stub_;
     int                                             id_;
     int                                             port_;
 };
 
-void sendEscherCommunication(
-  EscherletPayloadClient* client,
+void sendPolluxCommunication(
+  PolluxletPayloadClient* client,
   int destination,
   const std::string& key,
   const std::string& value) {
-  client->escherCommunication(destination, key, value);
+  client->polluxCommunication(destination, key, value);
 }
 
-void mainLoop(EscherletPayloadClient* client) {
+void mainLoop(PolluxletPayloadClient* client) {
   Logger::info("Main loop started");
   while(1) {
     sleep(5);
     int pick = rand() % otherIDs.size();
     int id = otherIDs[pick];
-    sendEscherCommunication(client, id, "key", "value");
+    sendPolluxCommunication(client, id, "key", "value");
   }
 }
 
-class EscherPayloadService final : public escher::EscherPayload::Service {
+class PolluxPayloadService final : public pollux::PolluxPayload::Service {
   public:
-    EscherPayloadService() = delete;
-    EscherPayloadService(const EscherPayloadService&) = delete;
-    EscherPayloadService(EscherletPayloadClient* client): escherletClient_(client) {}
+    PolluxPayloadService() = delete;
+    PolluxPayloadService(const PolluxPayloadService&) = delete;
+    PolluxPayloadService(PolluxletPayloadClient* client): polluxletClient_(client) {}
     grpc::Status Terminate(
       grpc::ServerContext* context,
-      const escher::PayloadTerminateMessage* messsage, 
-      escher::PayloadTerminateResponse* response) override {
+      const pollux::PayloadTerminateMessage* messsage, 
+      pollux::PayloadTerminateResponse* response) override {
       //Terminate local app
       //should the server be gracefully shutdown ??  
       return grpc::Status::OK;
@@ -120,21 +120,21 @@ class EscherPayloadService final : public escher::EscherPayload::Service {
 
     grpc::Status Start(
       grpc::ServerContext* context,
-      const escher::PayloadStartMessage* messsage, 
-      escher::PayloadStartResponse* response) override {
+      const pollux::PayloadStartMessage* messsage, 
+      pollux::PayloadStartResponse* response) override {
       Logger::info("Start payload received");
-      std::thread mainLoopThread(mainLoop, escherletClient_);
+      std::thread mainLoopThread(mainLoop, polluxletClient_);
       mainLoopThread.detach();
       response->set_info("Payload has been started");
       return grpc::Status::OK;
     }
 
-    grpc::Status EscherCommunication(
+    grpc::Status PolluxCommunication(
       grpc::ServerContext* context,
-      const escher::EscherMessage* message,
-      escher::EscherMessageResponse* response) override {
+      const pollux::PolluxMessage* message,
+      pollux::PolluxMessageResponse* response) override {
       std::ostringstream logMessage;
-      logMessage << "Escher Message received: "
+      logMessage << "Pollux Message received: "
         << "origin=" << message->origin()
         << ", key=" << message->key()
         << ", value=" << message->value();
@@ -143,7 +143,7 @@ class EscherPayloadService final : public escher::EscherPayload::Service {
       return grpc::Status::OK;
     }
   private:
-    EscherletPayloadClient* escherletClient_ {nullptr};
+    PolluxletPayloadClient* polluxletClient_ {nullptr};
 };
 
 int getAvailablePort() {
@@ -229,13 +229,17 @@ int main(int argc, char **argv) {
     std::cout << "id argument is mandatory" << std::endl;
     printHelp();
   }
+  if (partitions == -1) {
+    std::cout << "partitions argument is mandatory" << std::endl;
+    printHelp();
+  }
 
   int localID = id;
   otherIDs = std::vector<int>(partitions);
   std::iota(otherIDs.begin(), otherIDs.end(), 0);
   otherIDs.erase(std::remove(otherIDs.begin(), otherIDs.end(), localID), otherIDs.end());
 
-  std::string logFileName("escher-app-" + std::to_string(id) + ".log");
+  std::string logFileName("pollux-app-" + std::to_string(id) + ".log");
   std::filesystem::path logFilePath(logFileName);
   logFile.open(logFilePath);
   Logger::info("########################################################");
@@ -246,13 +250,13 @@ int main(int argc, char **argv) {
   std::string address("localhost");
   address += ":" + std::to_string(masterPort);
   Logger::info("creating local client");
-  EscherletPayloadClient client(
+  PolluxletPayloadClient client(
     grpc::CreateChannel(address, grpc::InsecureChannelCredentials()),
     localID,
     localPort
   );
 
-  Logger::info("contacting escherlet on " + address + " and sending ready message");
+  Logger::info("contacting polluxlet on " + address + " and sending ready message");
   //I'm alive send message
   client.sendPayloadReady(localPort);
 
@@ -260,7 +264,7 @@ int main(int argc, char **argv) {
   Logger::info("starting server on " + std::to_string(localPort));
   std::string serverAddress("localhost:");
   serverAddress += std::to_string(localPort);
-  EscherPayloadService service(&client);
+  PolluxPayloadService service(&client);
   grpc::ServerBuilder builder;
   builder.AddListeningPort(serverAddress, grpc::InsecureServerCredentials());
   //Explore the following later
@@ -277,7 +281,7 @@ int main(int argc, char **argv) {
   }
   server->Wait(); //blocking
 
-  //we get there if EscherPayloadService was terminated
+  //we get there if PolluxPayloadService was terminated
   {
     std::ostringstream message;
     message << "Server " << serverAddress << " terminated";
