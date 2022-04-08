@@ -36,13 +36,13 @@ void printHelp() {
   exit(1);
 }
 
-class PolluxletPayloadClient {
+class ZebulonPayloadClient {
   public:
-    PolluxletPayloadClient(
+    ZebulonPayloadClient(
       std::shared_ptr<grpc::Channel> channel,
       int id,
       int port):
-        stub_(pollux::PolluxletPayload::NewStub(channel)),
+        stub_(pollux::ZebulonPayload::NewStub(channel)),
         id_(id),
         port_(port)
     {}
@@ -77,24 +77,24 @@ class PolluxletPayloadClient {
     }
 
     std::string getString() const {
-      return "PolluxletPayloadClient id: " + std::to_string(id_) + " port: " + std::to_string(port_);
+      return "ZebulonPayloadClient id: " + std::to_string(id_) + " port: " + std::to_string(port_);
     }
 
   private:
-    std::unique_ptr<pollux::PolluxletPayload::Stub> stub_;
+    std::unique_ptr<pollux::ZebulonPayload::Stub> stub_;
     int                                             id_;
     int                                             port_;
 };
 
 void sendPolluxCommunication(
-  PolluxletPayloadClient* client,
+  ZebulonPayloadClient* client,
   int destination,
   const std::string& key,
   const std::string& value) {
   client->polluxCommunication(destination, key, value);
 }
 
-void mainLoop(PolluxletPayloadClient* client) {
+void mainLoop(ZebulonPayloadClient* client) {
   Logger::info("Main loop started");
   while(1) {
     sleep(5);
@@ -108,7 +108,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
   public:
     PolluxPayloadService() = delete;
     PolluxPayloadService(const PolluxPayloadService&) = delete;
-    PolluxPayloadService(PolluxletPayloadClient* client): polluxletClient_(client) {}
+    PolluxPayloadService(ZebulonPayloadClient* client): zebulonClient_(client) {}
     grpc::Status Terminate(
       grpc::ServerContext* context,
       const pollux::PayloadTerminateMessage* messsage, 
@@ -123,7 +123,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       const pollux::PayloadStartMessage* messsage, 
       pollux::PayloadStartResponse* response) override {
       Logger::info("Start payload received");
-      std::thread mainLoopThread(mainLoop, polluxletClient_);
+      std::thread mainLoopThread(mainLoop, zebulonClient_);
       mainLoopThread.detach();
       response->set_info("Payload has been started");
       return grpc::Status::OK;
@@ -143,7 +143,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       return grpc::Status::OK;
     }
   private:
-    PolluxletPayloadClient* polluxletClient_ {nullptr};
+    ZebulonPayloadClient* zebulonClient_ {nullptr};
 };
 
 int getAvailablePort() {
@@ -250,13 +250,13 @@ int main(int argc, char **argv) {
   std::string address("localhost");
   address += ":" + std::to_string(masterPort);
   Logger::info("creating local client");
-  PolluxletPayloadClient client(
+  ZebulonPayloadClient client(
     grpc::CreateChannel(address, grpc::InsecureChannelCredentials()),
     localID,
     localPort
   );
 
-  Logger::info("contacting polluxlet on " + address + " and sending ready message");
+  Logger::info("contacting zebulon on " + address + " and sending ready message");
   //I'm alive send message
   client.sendPayloadReady(localPort);
 

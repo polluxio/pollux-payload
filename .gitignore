@@ -2,10 +2,9 @@
 *~
 *.pyc
 *.log
-src/python/escher_payload_pb2_grpc.py
-src/python/escher_payload_pb2.py
-src/python/escher_pb2_grpc.py
-src/python/escher_pb2.py
+src/python/pollux_payload_pb2_grpc.py
+src/python/pollux_payload_pb2.py
+src/python/pollux_pb2_grpc.py
+src/python/pollux_pb2.py
 build
 .*.swp
-src/c++/EscherApp.cpp

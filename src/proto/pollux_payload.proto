@@ -13,8 +13,8 @@ service PolluxPayload {
   rpc Terminate(PayloadTerminateMessage) returns (PayloadTerminateResponse) {}
 }
 
-//Pollux Payload server from Polluxlet side
-service PolluxletPayload {
+//Pollux Payload server from Zebulon side
+service ZebulonPayload {
   rpc PayloadReady(PayloadReadyMessage) returns (PayloadReadyResponse) {}
   rpc PayloadInactive(PayloadInactiveMessage) returns (PayloadInactiveResponse) {}
   rpc PolluxCommunication(PolluxMessage) returns (PolluxMessageResponse) {}

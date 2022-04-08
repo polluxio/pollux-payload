@@ -7,7 +7,7 @@ import shutil
 import sys
 
 def run(partitions, commandLine):
-  dirName = 'eschetest'
+  dirName = 'polluxtest'
   #create polluxtest dir, erase it first if it exists
   if os.path.exists(dirName):
     shutil.rmtree(dirName)
