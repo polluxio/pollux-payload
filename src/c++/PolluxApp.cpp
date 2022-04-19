@@ -2,13 +2,14 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <chrono>
 #include <thread>
 #include <numeric>
+#include <filesystem>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include <grpcpp/create_channel.h>
-#include <grpcpp/server_builder.h>
+#include <grpcpp/grpcpp.h>
 
 #include "pollux_payload.grpc.pb.h"
 
@@ -97,7 +98,8 @@ void sendPolluxCommunication(
 void mainLoop(ZebulonPayloadClient* client) {
   Logger::info("Main loop started");
   while(1) {
-    sleep(5);
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for(5000ms);
     int pick = rand() % otherIDs.size();
     int id = otherIDs[pick];
     sendPolluxCommunication(client, id, "key", "value");
