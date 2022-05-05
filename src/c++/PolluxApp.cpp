@@ -33,8 +33,8 @@ void printHelp() {
     << "--port <p>:         Pollux master port" << std::endl
     << "--id <id>:          Pollux payload id" << std::endl
     << "--partitions <nb>:  Global number of partitions" << std::endl 
-    << "--alone:            Do not attempt to connect to Pollux master port" << std::endl
-    << "--help:             Displays this help and exit" << std::endl;
+    << "--help:             Displays this help and exit" << std::endl
+    << "--alone:            Do not attempt to connect to Pollux master port (only useful for debugging)" << std::endl;
   exit(1);
 }
 
@@ -49,12 +49,12 @@ class ZebulonPayloadClient {
 
     void sendPayloadReady(uint16_t port) {
       grpc::ClientContext context;
-      //pollux::PolluxVersion version;
-      //version.set_version(pollux::PolluxVersion_Version::PolluxVersion_Version_CURRENT);
+      pollux::PolluxVersion version;
+      version.set_version(pollux::PolluxVersion_Version::PolluxVersion_Version_CURRENT);
       pollux::PayloadReadyMessage request;
       request.set_info("I'm alive from: " + std::to_string(id_));
       request.set_port(port);
-      //request.set_allocated_version(&version);
+      request.set_allocated_version(&version);
       pollux::PayloadReadyResponse response;
       grpc::Status status = stub_->PayloadReady(&context, request, &response);
       if (not status.ok()) {
