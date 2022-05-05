@@ -49,12 +49,12 @@ class ZebulonPayloadClient {
 
     void sendPayloadReady(uint16_t port) {
       grpc::ClientContext context;
-      pollux::PolluxVersion version;
-      version.set_version(pollux::PolluxVersion_Version::PolluxVersion_Version_CURRENT);
+      pollux::PolluxVersion* version = new pollux::PolluxVersion();
+      version->set_version(pollux::PolluxVersion_Version::PolluxVersion_Version_CURRENT);
       pollux::PayloadReadyMessage request;
       request.set_info("I'm alive from: " + std::to_string(id_));
       request.set_port(port);
-      request.set_allocated_version(&version);
+      request.set_allocated_version(version);
       pollux::PayloadReadyResponse response;
       grpc::Status status = stub_->PayloadReady(&context, request, &response);
       if (not status.ok()) {
