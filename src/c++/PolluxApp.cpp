@@ -6,9 +6,6 @@
 #include <thread>
 #include <numeric>
 #include <filesystem>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
 #include <grpcpp/grpcpp.h>
 
@@ -148,68 +145,6 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
   private:
     ZebulonPayloadClient* zebulonClient_ {nullptr};
 };
-
-struct ServerAddress {
-  char        ip[16];
-  uint16_t    port;
-  std::string getString() const {
-    std::ostringstream stream;
-    stream << ip << ":" << port;
-    return stream.str();
-  }
-};
-
-ServerAddress getAvailableAddress() {
-  Logger::info("Searching available address and port");
-  int sock = socket(AF_INET, SOCK_STREAM, 0);
-  if (sock == -1) {
-    throw PolluxAppException("While getting available address, impossible to build socket."); 
-  }
-
-  {
-    struct sockaddr_in sin;
-    sin.sin_port = 0; //get next available port
-    sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    //sin.sin_addr.s_addr = htonl(INADDR_ANY);
-    sin.sin_family = AF_INET;
-    
-    if (bind(sock, (struct sockaddr *)&sin, sizeof(struct sockaddr_in)) == -1) {
-      std::string errorMessage;
-      if (errno == EADDRINUSE) {
-        errorMessage = "While getting available address: the address is not available. already used by other process";
-      } else {
-        std::stringstream error;
-        error << "While getting available address, error (";
-        error << errno << "): " << strerror(errno);
-        errorMessage = error.str();
-      }
-      Logger::error(errorMessage);
-      throw PolluxAppException(errorMessage);
-    }
-  }
-
-  {
-    struct sockaddr_in sin;
-    socklen_t len = sizeof(sin);
-    if (getsockname(sock, (struct sockaddr *)&sin, &len) != -1) {
-      ServerAddress serverAddress;
-      inet_ntop(AF_INET, &sin.sin_addr, serverAddress.ip, sizeof(serverAddress.ip));
-      std::ostringstream stream;
-      stream << "Local ip address: ";
-      stream << serverAddress.ip;
-      Logger::info(stream.str());
-      Logger::info("port number (raw): " + std::to_string((sin.sin_port)));
-      Logger::info("port number: " + std::to_string((ntohs(sin.sin_port))));
-
-      //The ntohs() function converts the unsigned short integer netshort
-      //from network byte order to host byte order.
-      serverAddress.port = ntohs(sin.sin_port);
-      //serverAddress.port = sin.sin_port;
-      return serverAddress;
-    }
-  }
-  throw PolluxAppException("getAvailableAddress: unknown error");
-}
 
 }
 
