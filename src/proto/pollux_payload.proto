@@ -9,14 +9,15 @@ import "pollux.proto";
 //Pollux server from Payload side
 service PolluxPayload {
   rpc PolluxCommunication(PolluxMessage) returns (PolluxMessageResponse) {}
-  rpc Start(PayloadStartMessage) returns (PayloadStartResponse) {}
-  rpc Terminate(PayloadTerminateMessage) returns (PayloadTerminateResponse) {}
+  rpc Start(PayloadStartMessage) returns (PolluxStandardResponse) {}
+  rpc Terminate(PayloadTerminateMessage) returns (EmptyResponse) {}
 }
 
 //Pollux Payload server from Zebulon side
 service ZebulonPayload {
-  rpc PayloadReady(PayloadReadyMessage) returns (PayloadReadyResponse) {}
-  rpc PayloadInactive(PayloadInactiveMessage) returns (PayloadInactiveResponse) {}
+  rpc PayloadReady(PayloadReadyMessage) returns (PolluxStandardResponse) {}
+  rpc PayloadLoopDone(PayloadLoopDoneMessage) returns (PolluxStandardResponse) {}
+  rpc PayloadInactive(PayloadInactiveMessage) returns (PolluxStandardResponse) {}
   rpc PolluxCommunication(PolluxMessage) returns (PolluxMessageResponse) {}
 }
 
@@ -26,8 +27,8 @@ message PayloadReadyMessage {
   pollux.PolluxVersion version = 3;
 }
 
-message PayloadReadyResponse {
-  string info = 1;
+message PayloadLoopDoneMessage {
+  uint32 iteration = 1;
 }
 
 message PayloadInactiveMessage {
@@ -35,21 +36,10 @@ message PayloadInactiveMessage {
   uint64 since = 2;
 }
 
-message PayloadInactiveResponse {
-  string info = 1;
-}
-
 message PayloadStartMessage {
-  string info = 1;
-}
-
-message PayloadStartResponse {
   string info = 1;
 }
 
 message PayloadTerminateMessage {
   string info = 1;
-}
-
-message PayloadTerminateResponse {
 }

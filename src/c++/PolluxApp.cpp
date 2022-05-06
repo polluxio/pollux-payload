@@ -55,7 +55,7 @@ class ZebulonPayloadClient {
       request.set_info("I'm alive from: " + std::to_string(id_));
       request.set_port(port);
       request.set_allocated_version(version);
-      pollux::PayloadReadyResponse response;
+      pollux::PolluxStandardResponse response;
       grpc::Status status = stub_->PayloadReady(&context, request, &response);
       if (not status.ok()) {
         Logger::error("Error while sending \"sendPayloadReady\": " + status.error_message());
@@ -112,7 +112,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
     grpc::Status Terminate(
       grpc::ServerContext* context,
       const pollux::PayloadTerminateMessage* messsage, 
-      pollux::PayloadTerminateResponse* response) override {
+      pollux::EmptyResponse* response) override {
       //Terminate local app
       //should the server be gracefully shutdown ??  
       return grpc::Status::OK;
@@ -121,7 +121,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
     grpc::Status Start(
       grpc::ServerContext* context,
       const pollux::PayloadStartMessage* messsage, 
-      pollux::PayloadStartResponse* response) override {
+      pollux::PolluxStandardResponse* response) override {
       Logger::info("Start payload received");
       std::thread mainLoopThread(mainLoop, zebulonClient_);
       mainLoopThread.detach();

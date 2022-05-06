@@ -7,7 +7,7 @@ package pollux;
 message PolluxVersion {
   enum Version {
     DUMMY = 0;
-    CURRENT = 1;
+    CURRENT = 2;
   }
   Version version = 1;
 }
@@ -21,4 +21,11 @@ message PolluxMessage {
 
 message PolluxMessageResponse {
   string info = 1;
+}
+
+message PolluxStandardResponse {
+  string info = 1;
+}
+
+message EmptyResponse {
 }
