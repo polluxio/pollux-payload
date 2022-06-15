@@ -1,3 +1,14 @@
-add_executable(polluxapp PolluxApp.cpp)
+add_subdirectory(thirdparty)
 
-target_link_libraries(polluxapp pollux_grpc)
+set (sources
+  common/ZebulonPayloadClient.cpp
+  PolluxApp.cpp
+)
+
+add_executable(polluxapp ${sources})
+
+target_include_directories(polluxapp PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/common
+)
+
+target_link_libraries(polluxapp pollux_grpc plog)
