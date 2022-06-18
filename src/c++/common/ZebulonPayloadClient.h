@@ -11,6 +11,7 @@ class ZebulonPayloadClient {
     ZebulonPayloadClient(std::shared_ptr<grpc::Channel> channel, int id);
 
     void sendPayloadReady(uint16_t port);
+    void sendPayloadLoopDone(int iteration);
     void polluxCommunication(int id, const std::string& key, const std::string& value);
     std::string getString() const;
 

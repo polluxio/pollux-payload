@@ -18,10 +18,24 @@ void ZebulonPayloadClient::sendPayloadReady(uint16_t port) {
   pollux::PolluxStandardResponse response;
   grpc::Status status = stub_->PayloadReady(&context, request, &response);
   if (not status.ok()) {
-    PLOG_ERROR << "Error while sending \"sendPayloadReady\": " << status.error_message();
+    PLOG_FATAL << "Error while sending \"sendPayloadReady\": " << status.error_message();
     exit(-54);
   }
   PLOG_INFO << "Response from Zebulon to PayloadReady: " << response.info();
+}
+
+void ZebulonPayloadClient::sendPayloadLoopDone(int iteration) {
+  grpc::ClientContext context;
+  pollux::PayloadLoopDoneMessage request;
+  request.set_iteration(iteration);
+  pollux::PolluxStandardResponse response;
+  grpc::Status status = stub_->PayloadLoopDone(&context, request, &response);
+  PLOG_INFO << "Sending PayloadDone";
+  if (not status.ok()) {
+    PLOG_FATAL << "Error while sending \"sendPayloadLoopDone\": " << status.error_message();
+    exit(-54);
+  }
+  PLOG_INFO << "Response from Zebulon to PayloadDone: " << response.info();
 }
 
 void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, const std::string& value) {

@@ -22,38 +22,56 @@ std::vector<int> otherIDs;
 
 void printHelp() {
   std::cout
-    << "--port <p>:         Pollux master port" << std::endl
-    << "--id <id>:          Pollux payload id" << std::endl
-    << "--partitions <nb>:  Global number of partitions" << std::endl 
-    << "--help:             Displays this help and exit" << std::endl
+    << "--port <p>          Pollux master port" << std::endl
+    << "--id <id>           Pollux payload id" << std::endl
+    << "--partitions <nb>   Global number of partitions" << std::endl 
+    << "--help              Displays this help and exit" << std::endl
+    << "--synchronized      Synchronous mode" << std::endl
     << "--alone:            Do not attempt to connect to Pollux master port (only useful for debugging)" << std::endl;
   exit(1);
 }
 
-void sendPolluxCommunication(
-  ZebulonPayloadClient* client,
-  int destination,
-  const std::string& key,
-  const std::string& value) {
-  client->polluxCommunication(destination, key, value);
-}
+class UserPayLoad {
+  public:
+    UserPayLoad() = default;
+    UserPayLoad(const UserPayLoad&) = default;
 
-void mainLoop(ZebulonPayloadClient* client) {
-  PLOG_INFO << "Main loop started";
-  while(1) {
-    using namespace std::chrono_literals;
-    std::this_thread::sleep_for(5000ms);
-    int pick = rand() % otherIDs.size();
-    int id = otherIDs[pick];
-    sendPolluxCommunication(client, id, "key", "value");
-  }
-}
+    void setSynchronized(bool mode) {
+      synchronized_ = mode;
+    }
+
+    void loop(ZebulonPayloadClient* client) {
+      PLOG_INFO << "Main loop started iteration:" << iteration_ << " synchronized:" << synchronized_;
+      int nbMessages = 0;
+      while (1) { //4x communication
+        using namespace std::chrono_literals;
+        //use more random sleep
+        std::this_thread::sleep_for(5000ms);
+        int pick = rand() % otherIDs.size();
+        int id = otherIDs[pick];
+        PLOG_INFO << "Message " << nbMessages++;
+        client->polluxCommunication(id, "key", "value");
+        if (synchronized_ and nbMessages > 4) {
+          break;
+        }
+      }
+      if (synchronized_) {
+        client->sendPayloadLoopDone(iteration_++);
+      }
+    }
+  private:
+    bool  synchronized_ = false;
+    int   iteration_ = 0;
+};
+
 
 class PolluxPayloadService final : public pollux::PolluxPayload::Service {
   public:
     PolluxPayloadService() = delete;
     PolluxPayloadService(const PolluxPayloadService&) = delete;
-    PolluxPayloadService(ZebulonPayloadClient* client): zebulonClient_(client) {}
+    PolluxPayloadService(ZebulonPayloadClient* client, const UserPayLoad& payload):
+      userPayLoad_(payload),
+      zebulonClient_(client) {}
     grpc::Status Terminate(
       grpc::ServerContext* context,
       const pollux::PayloadTerminateMessage* messsage, 
@@ -68,7 +86,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       const pollux::PayloadStartMessage* messsage, 
       pollux::PolluxStandardResponse* response) override {
       PLOG_INFO << "Start payload received";
-      std::thread mainLoopThread(mainLoop, zebulonClient_);
+      std::thread mainLoopThread(&UserPayLoad::loop, &userPayLoad_, zebulonClient_);
       mainLoopThread.detach();
       response->set_info("Payload has been started");
       return grpc::Status::OK;
@@ -88,7 +106,8 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       return grpc::Status::OK;
     }
   private:
-    ZebulonPayloadClient* zebulonClient_ {nullptr};
+    ZebulonPayloadClient* zebulonClient_  {nullptr};
+    UserPayLoad           userPayLoad_    {};
 };
 
 }
@@ -96,19 +115,21 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
 int main(int argc, char **argv) {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-  const char* const short_opts = "pin:ha::";
+  const char* const short_opts = "pin:hsa::";
   const option long_opts[] = {
-    {"port",        required_argument,  0,        'p'},
-    {"id",          required_argument,  0,        'i'},
-    {"partitions",  required_argument,  0,        'n'},
-    {"alone",       no_argument,        nullptr,  'a'},
-    {"help" ,       no_argument,        nullptr,  'h'},
-    {nullptr,       no_argument,        nullptr,  0}
+    {"port",          required_argument,  0,        'p'},
+    {"id",            required_argument,  0,        'i'},
+    {"partitions",    required_argument,  0,        'n'},
+    {"synchronized",  no_argument,        nullptr,  's'},
+    {"alone",         no_argument,        nullptr,  'a'},
+    {"help" ,         no_argument,        nullptr,  'h'},
+    {nullptr,         no_argument,        nullptr,  0}
   };
 
   int zebulonPort = -1;
   int id = -1;
   int partitions = -1;
+  bool synchronized = false;
   bool alone = false;
 
   while (true) {
@@ -129,6 +150,9 @@ int main(int argc, char **argv) {
         break;
       case 'a':
         alone = true;
+        break;
+      case 's':
+        synchronized = true;
         break;
       case 'h':
       default:
@@ -152,10 +176,21 @@ int main(int argc, char **argv) {
   }
 
   std::string logFileName("pollux-app-" + std::to_string(id) + ".log");
-  plog::init(plog::debug, logFileName.c_str());
+  plog::init(plog::debug, logFileName.c_str(), 0);
   PLOG_INFO << "########################################################";
   PLOG_INFO << logFileName;
   PLOG_INFO << "########################################################";
+  {
+    std::ostringstream stream;
+    for (int i=0; i<argc; i++) {
+      stream << argv[i] << " ";
+    }
+    PLOG_INFO << "Command line: " << stream.str();
+  }
+
+  if (synchronized) {
+    PLOG_INFO << "Synchronized mode is on";
+  }
 
   try {
     int localID = id;
@@ -179,7 +214,9 @@ int main(int argc, char **argv) {
 
     std::string localServerAddress("localhost:0");
     //Logger::info("starting server on " + serverAddress.getString());
-    PolluxPayloadService service(zebulonClient);
+    UserPayLoad userPayLoad;
+    userPayLoad.setSynchronized(synchronized);
+    PolluxPayloadService service(zebulonClient, userPayLoad);
     grpc::ServerBuilder builder;
     //AddListeningPort last optional arg: If not nullptr, gets populated with the port number bound to the grpc::Server
     //for the corresponding endpoint after it is successfully bound by BuildAndStart(), 0 otherwise.
@@ -207,7 +244,6 @@ int main(int argc, char **argv) {
     }
 
     //create and run local server
-
     PLOG_INFO << "Server listening on " << std::to_string(serverPort);
     server->Wait(); //blocking
 
