@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+option go_package = "pollux/private/grpc";
+
 package pollux;
 
 import "pollux.proto";
@@ -14,7 +16,8 @@ service PolluxPayload {
 //Pollux Payload server from Zebulon side
 service ZebulonPayload {
   rpc PayloadReady(PayloadReadyMessage) returns (PolluxStandardResponse) {}
-  rpc PayloadLoopDone(PayloadLoopDoneMessage) returns (PolluxStandardResponse) {}
+  rpc PayloadLoopDone(PayloadLoopMessage) returns (PolluxStandardResponse) {}
+  rpc PayloadLoopEnd(PayloadLoopMessage) returns (PolluxStandardResponse) {}
   rpc PayloadInactive(PayloadInactiveMessage) returns (PolluxStandardResponse) {}
   rpc PolluxCommunication(PolluxMessage) returns (PolluxMessageResponse) {}
 }
@@ -25,7 +28,7 @@ message PayloadReadyMessage {
   pollux.PolluxVersion version = 3;
 }
 
-message PayloadLoopDoneMessage {
+message PayloadLoopMessage {
   uint32 iteration = 1;
 }
 

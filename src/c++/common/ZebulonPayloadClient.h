@@ -12,6 +12,7 @@ class ZebulonPayloadClient {
 
     void sendPayloadReady(uint16_t port);
     void sendPayloadLoopDone(int iteration);
+    void sendPayloadLoopEnd(int iteration);
     void polluxCommunication(int id, const std::string& key, const std::string& value);
     std::string getString() const;
 

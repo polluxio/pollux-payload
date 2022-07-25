@@ -8,3 +8,4 @@ src/python/pollux_pb2_grpc.py
 src/python/pollux_pb2.py
 build
 .*.swp
+.DS_Store

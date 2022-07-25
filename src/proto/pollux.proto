@@ -1,14 +1,13 @@
 syntax = "proto3";
 
 option go_package = "pollux/private/grpc";
-option java_package = "io.zellij.pollux";
 
 package pollux;
 
 message PolluxVersion {
   enum Version {
     DUMMY = 0;
-    CURRENT = 2;
+    CURRENT = 3;
   }
   Version version = 1;
 }

@@ -56,7 +56,11 @@ class UserPayLoad {
         }
       }
       if (synchronized_) {
-        client->sendPayloadLoopDone(iteration_++);
+        if (iteration_ > 5) {
+          client->sendPayloadLoopEnd(iteration_++);
+        } else {
+          client->sendPayloadLoopDone(iteration_++);
+        }
       }
     }
   private:
@@ -155,6 +159,8 @@ int main(int argc, char **argv) {
         synchronized = true;
         break;
       case 'h':
+        printHelp();
+        break;
       default:
         std::cout << opt << " is not a recognized option, recognized options are:" << std::endl;
         printHelp();
