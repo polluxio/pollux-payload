@@ -59,7 +59,7 @@ class UserPayLoad {
         if (iteration_ > 5) {
           client->sendPayloadLoopEnd(iteration_++);
         } else {
-          client->sendPayloadLoopDone(iteration_++);
+          client->sendPayloadLoopReadyForNextIteration(iteration_++);
         }
       }
     }
@@ -98,13 +98,17 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
 
     grpc::Status PolluxCommunication(
       grpc::ServerContext* context,
-      const pollux::PolluxMessage* message,
+      const pollux::PolluxMapMessage* message,
       pollux::PolluxMessageResponse* response) override {
       std::ostringstream logMessage;
       logMessage << "Pollux Message received: "
-        << "origin=" << message->origin()
-        << ", key=" << message->key()
-        << ", value=" << message->value();
+        << "origin=" << message->origin();
+      for (auto& [key, value]: message->map()) {
+        logMessage << ", key=" << key;
+        if (value.has_strvalue()) {
+          logMessage << ", value=" << value.strvalue() << std::endl;
+        }
+      }
       PLOG_INFO << logMessage.str();
       response->set_info(logMessage.str() + " understood");
       return grpc::Status::OK;

@@ -7,16 +7,22 @@ package pollux;
 message PolluxVersion {
   enum Version {
     DUMMY = 0;
-    CURRENT = 3;
+    CURRENT = 4;
   }
   Version version = 1;
 }
 
-message PolluxMessage {
+message PolluxMessageValue {
+  oneof value {
+    string strValue = 1;
+    uint64 uint64Value = 2;
+  }
+}
+
+message PolluxMapMessage {
   uint32 origin  = 1;
   repeated uint32 destinations = 2;
-  string key = 3;
-  string value = 4;
+  map<string, PolluxMessageValue> map = 3; 
 }
 
 message PolluxMessageResponse {

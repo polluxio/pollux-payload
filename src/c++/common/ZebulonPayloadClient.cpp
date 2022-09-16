@@ -24,18 +24,18 @@ void ZebulonPayloadClient::sendPayloadReady(uint16_t port) {
   PLOG_INFO << "Response from Zebulon to PayloadReady: " << response.info();
 }
 
-void ZebulonPayloadClient::sendPayloadLoopDone(int iteration) {
+void ZebulonPayloadClient::sendPayloadLoopReadyForNextIteration(int iteration) {
   grpc::ClientContext context;
   pollux::PayloadLoopMessage request;
   request.set_iteration(iteration);
   pollux::PolluxStandardResponse response;
-  grpc::Status status = stub_->PayloadLoopDone(&context, request, &response);
-  PLOG_INFO << "Sending PayloadDone";
+  grpc::Status status = stub_->PayloadLoopReadyForNextIteration(&context, request, &response);
+  PLOG_INFO << "Sending PayloadLoopReadyForNextIteration";
   if (not status.ok()) {
-    PLOG_FATAL << "Error while sending \"sendPayloadLoopDone\": " << status.error_message();
+    PLOG_FATAL << "Error while sending \"sendPayloadLoopReadyForNextIteration\": " << status.error_message();
     exit(-54);
   }
-  PLOG_INFO << "Response from Zebulon to PayloadDone: " << response.info();
+  PLOG_INFO << "Response from Zebulon to PayloadLoopReadyForNextIteration: " << response.info();
 }
 
 void ZebulonPayloadClient::sendPayloadLoopEnd(int iteration) {
@@ -54,11 +54,13 @@ void ZebulonPayloadClient::sendPayloadLoopEnd(int iteration) {
 
 void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, const std::string& value) {
   grpc::ClientContext context;
-  pollux::PolluxMessage message;
+  pollux::PolluxMapMessage message;
   message.set_origin(id_);
   message.add_destinations(id);
-  message.set_key(key);
-  message.set_value(value);
+  pollux::PolluxMessageValue messageValue;
+  messageValue.set_strvalue(value);
+  (*message.mutable_map())[key] = messageValue;
+
   pollux::PolluxMessageResponse response;
   grpc::Status status = stub_->PolluxCommunication(&context, message, &response);
   PLOG_INFO << "PolluxCommunication::Response: " << response.info();
