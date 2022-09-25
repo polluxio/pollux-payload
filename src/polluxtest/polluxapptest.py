@@ -6,7 +6,7 @@ import os
 import shutil
 import sys
 
-def run(partitions, commandLine, dir_name):
+def run(partitions, commandLine, dir_name, synchronized):
   #create polluxtest dir, erase it first if it exists
   if os.path.exists(dir_name):
     shutil.rmtree(dir_name)
@@ -15,6 +15,9 @@ def run(partitions, commandLine, dir_name):
   topYamlName = 'pollux.yaml'
   topYamlPath = os.path.join(dir_name, topYamlName)
   topYaml = open(topYamlPath, 'w')
+  if synchronized:
+    topYaml.write('options:\n')
+    topYaml.write('  synchronized: true\n')
   topYaml.write('subdirs:\n')
 
   for i in range(partitions):
@@ -42,9 +45,10 @@ class ArgumentParser(argparse.ArgumentParser):
 
 def main() -> int:
   parser = ArgumentParser(prog='polluxapptest', exit_on_error=False)
-  parser.add_argument("--name", required=False, help="created directory namen", default="polluxapptest")
+  parser.add_argument("--name", required=False, help="created directory name", default="polluxapptest")
   parser.add_argument("--partitions", required=True, help="number of partitions")
   parser.add_argument("--command", required=True, help="payload command line")
+  parser.add_argument("--not_synchronized", required=False, help="Disable Pollux synchronized mode", action='store_true')
 
   args = parser.parse_args()
 
@@ -61,7 +65,7 @@ def main() -> int:
 
   logging.info("command line arguments:" + ''.join(" " + s  for s in sys.argv[1:]))
 
-  run(int(args.partitions), args.command, args.name)
+  run(int(args.partitions), args.command, args.name, not args.not_synchronized)
   logging.info("polluxapptest terminated")
   return 0
 
