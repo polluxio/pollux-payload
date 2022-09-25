@@ -105,8 +105,12 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
         << "origin=" << message->origin();
       for (auto& [key, value]: message->map()) {
         logMessage << ", key=" << key;
-        if (value.has_strvalue()) {
-          logMessage << ", value=" << value.strvalue() << std::endl;
+        switch (value.value_case()) {
+          case pollux::PolluxMessageValue::kStrValue:
+            logMessage << ", value=" << value.strvalue() << std::endl;
+            break;
+          default:
+            break;
         }
       }
       PLOG_INFO << logMessage.str();
