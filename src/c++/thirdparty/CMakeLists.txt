@@ -1,1 +1,1 @@
-add_subdirectory(plog-1.1.8)
+add_subdirectory(spdlog-1.10.0)

@@ -6,8 +6,8 @@
 #include <thread>
 #include <numeric>
 
-#include <plog/Log.h>
-#include <plog/Initializers/RollingFileInitializer.h>
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h" // support for basic file logging
 
 #include <grpcpp/grpcpp.h>
 
@@ -41,7 +41,7 @@ class UserPayLoad {
     }
 
     void loop(ZebulonPayloadClient* client) {
-      PLOG_INFO << "Main loop started iteration:" << iteration_ << " synchronized:" << synchronized_;
+      spdlog::info("Main loop started iteration: {} synchronized: {}", iteration_, synchronized_);
       int nbMessages = 0;
       while (1) { //4x communication
         using namespace std::chrono_literals;
@@ -49,7 +49,7 @@ class UserPayLoad {
         std::this_thread::sleep_for(5000ms);
         int pick = rand() % otherIDs.size();
         int id = otherIDs[pick];
-        PLOG_INFO << "Message " << nbMessages++;
+        spdlog::info("Message {}", nbMessages++);
         client->polluxCommunication(id, "key", "value");
         if (synchronized_ and nbMessages > 4) {
           break;
@@ -89,7 +89,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       grpc::ServerContext* context,
       const pollux::PayloadStartMessage* messsage, 
       pollux::PolluxStandardResponse* response) override {
-      PLOG_INFO << "Start payload received";
+      spdlog::info("Start payload received");
       std::thread mainLoopThread(&UserPayLoad::loop, &userPayLoad_, zebulonClient_);
       mainLoopThread.detach();
       response->set_info("Payload has been started");
@@ -113,7 +113,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
             break;
         }
       }
-      PLOG_INFO << logMessage.str();
+      spdlog::info("{}", logMessage.str());
       response->set_info(logMessage.str() + " understood");
       return grpc::Status::OK;
     }
@@ -190,20 +190,24 @@ int main(int argc, char **argv) {
   }
 
   std::string logFileName("pollux-app-" + std::to_string(id) + ".log");
-  plog::init(plog::debug, logFileName.c_str(), 0);
-  PLOG_INFO << "########################################################";
-  PLOG_INFO << logFileName;
-  PLOG_INFO << "########################################################";
+  auto myLogger = spdlog::basic_logger_mt("pollux_logger", logFileName.c_str());
+  spdlog::set_default_logger(myLogger);
+  spdlog::flush_every(std::chrono::seconds(3));
+  spdlog::info("########################################################");
+  spdlog::info(logFileName);
+  spdlog::info("########################################################");
   {
     std::ostringstream stream;
     for (int i=0; i<argc; i++) {
       stream << argv[i] << " ";
     }
-    PLOG_INFO << "Command line: " << stream.str();
+    spdlog::info("Command line: {}", stream.str());
   }
 
   if (synchronized) {
-    PLOG_INFO << "Synchronized mode is on";
+    spdlog::info("Synchronized mode is on");
+  } else {
+    spdlog::info("Synchronized mode is off");
   }
 
   try {
@@ -219,7 +223,7 @@ int main(int argc, char **argv) {
     zebulonAddress += ":" + std::to_string(zebulonPort);
 
     if (not alone) {
-      PLOG_INFO << "creating local client";
+      spdlog::info("creating local client");
       zebulonClient = new ZebulonPayloadClient(
         grpc::CreateChannel(zebulonAddress, grpc::InsecureChannelCredentials()),
         localID
@@ -244,7 +248,7 @@ int main(int argc, char **argv) {
     //builder.AddChannelArgument(GRPC_ARG_MAX_CONNECTION_IDLE_MS , 1000);
     builder.RegisterService(&service);
     std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    PLOG_INFO << "starting server on " << std::to_string(serverPort);
+    spdlog::info("starting server on {}", std::to_string(serverPort));
     if (not server.get()) {
       std::ostringstream message;
       message << "GRPC Server could not be started on " << std::to_string(serverPort);
@@ -252,27 +256,27 @@ int main(int argc, char **argv) {
     }
 
     if (not alone) {
-      PLOG_INFO << "contacting zebulon on " << zebulonAddress << " and sending ready message";
+      spdlog::info("contacting zebulon on {} and sending ready message", zebulonAddress);
       //I'm alive send message
       zebulonClient->sendPayloadReady(serverPort);
     }
 
     //create and run local server
-    PLOG_INFO << "Server listening on " << std::to_string(serverPort);
+    spdlog::info("Server listening on {}", std::to_string(serverPort));
     server->Wait(); //blocking
 
     //we get there if PolluxPayloadService was terminated
-    PLOG_INFO << "Server " << std::to_string(serverPort) << " terminated";
+    spdlog::info("Server {} terminated", std::to_string(serverPort));
 
     delete zebulonClient;
 
     // Optional:  Delete all global objects allocated by libprotobuf.
     google::protobuf::ShutdownProtobufLibrary();
   } catch (PolluxAppException& e) {
-    PLOG_ERROR << "PolluxAppException: " << e.getReason();
+    spdlog::error("PolluxAppException: {}", e.getReason());
   } catch (std::exception& e) {
-    PLOG_ERROR << e.what();
+    spdlog::error(e.what());
   }
-  PLOG_INFO << "End of " << logFileName;
+  spdlog::info("End of {}", logFileName);
   return 0;
 }

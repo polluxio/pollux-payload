@@ -1,6 +1,6 @@
 #include "ZebulonPayloadClient.h"
 
-#include <plog/Log.h>
+#include "spdlog/spdlog.h"
 
 ZebulonPayloadClient::ZebulonPayloadClient(std::shared_ptr<grpc::Channel> channel, int id):
   stub_(pollux::ZebulonPayload::NewStub(channel)),
@@ -18,10 +18,10 @@ void ZebulonPayloadClient::sendPayloadReady(uint16_t port) {
   pollux::PolluxStandardResponse response;
   grpc::Status status = stub_->PayloadReady(&context, request, &response);
   if (not status.ok()) {
-    PLOG_FATAL << "Error while sending \"sendPayloadReady\": " << status.error_message();
+    spdlog::error("Error while sending \"sendPayloadReady\": {}", status.error_message());
     exit(-54);
   }
-  PLOG_INFO << "Response from Zebulon to PayloadReady: " << response.info();
+  spdlog::info("Response from Zebulon to PayloadReady: {}", response.info());
 }
 
 void ZebulonPayloadClient::sendPayloadLoopReadyForNextIteration(int iteration) {
@@ -30,12 +30,12 @@ void ZebulonPayloadClient::sendPayloadLoopReadyForNextIteration(int iteration) {
   request.set_iteration(iteration);
   pollux::PolluxStandardResponse response;
   grpc::Status status = stub_->PayloadLoopReadyForNextIteration(&context, request, &response);
-  PLOG_INFO << "Sending PayloadLoopReadyForNextIteration";
+  spdlog::info("Sending PayloadLoopReadyForNextIteration");
   if (not status.ok()) {
-    PLOG_FATAL << "Error while sending \"sendPayloadLoopReadyForNextIteration\": " << status.error_message();
+    spdlog::error("Error while sending \"sendPayloadLoopReadyForNextIteration\": {}", status.error_message());
     exit(-54);
   }
-  PLOG_INFO << "Response from Zebulon to PayloadLoopReadyForNextIteration: " << response.info();
+  spdlog::info("Response from Zebulon to PayloadLoopReadyForNextIteration: {}", response.info());
 }
 
 void ZebulonPayloadClient::sendPayloadLoopEnd(int iteration) {
@@ -44,12 +44,12 @@ void ZebulonPayloadClient::sendPayloadLoopEnd(int iteration) {
   request.set_iteration(iteration);
   pollux::PolluxStandardResponse response;
   grpc::Status status = stub_->PayloadLoopEnd(&context, request, &response);
-  PLOG_INFO << "Sending PayloadEnd";
+  spdlog::info("Sending PayloadEnd");
   if (not status.ok()) {
-    PLOG_FATAL << "Error while sending \"sendPayloadLoopEnd\": " << status.error_message();
+    spdlog::error("Error while sending \"sendPayloadLoopEnd\": {}", status.error_message());
     exit(-54);
   }
-  PLOG_INFO << "Response from Zebulon to PayloadEnd: " << response.info();
+  spdlog::info("Response from Zebulon to PayloadEnd: ", response.info());
 }
 
 void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, const std::string& value) {
@@ -63,7 +63,7 @@ void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, c
 
   pollux::PolluxMessageResponse response;
   grpc::Status status = stub_->PolluxCommunication(&context, message, &response);
-  PLOG_INFO << "PolluxCommunication::Response: " << response.info();
+  spdlog::info("PolluxCommunication::Response: {}", response.info());
 }
 
 std::string ZebulonPayloadClient::getString() const {
