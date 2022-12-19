@@ -170,22 +170,22 @@ int main(int argc, char **argv) {
         printHelp();
         break;
       default:
-        std::cout << opt << " is not a recognized option, recognized options are:" << std::endl;
+        spdlog::error("{} is not a recognized option, recognized options are:", opt);
         printHelp();
         break;
     }
   }
 
   if (zebulonPort == -1) {
-    std::cout << "port argument is mandatory" << std::endl;
+    spdlog::error("port argument is mandatory");
     printHelp();
   }
   if (id == -1) {
-    std::cout << "id argument is mandatory" << std::endl;
+    spdlog::error("id argument is mandatory");
     printHelp();
   }
   if (partitions == -1) {
-    std::cout << "partitions argument is mandatory" << std::endl;
+    spdlog::error("partitions argument is mandatory");
     printHelp();
   }
 
