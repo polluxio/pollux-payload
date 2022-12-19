@@ -49,6 +49,10 @@ class UserPayLoad {
         std::this_thread::sleep_for(5000ms);
         int pick = rand() % otherIDs.size();
         int id = otherIDs[pick];
+        if (reporting_) {
+          spdlog::info("Reporting {}", nbMessages);
+          client->polluxReport(id, "key", "value");
+        }
         spdlog::info("Message {}", nbMessages++);
         client->polluxCommunication(id, "key", "value");
         if (synchronized_ and nbMessages > 4) {
@@ -65,6 +69,7 @@ class UserPayLoad {
     }
   private:
     bool  synchronized_ = false;
+    bool  reporting_    = true;
     int   iteration_ = 0;
 };
 

@@ -63,7 +63,26 @@ void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, c
 
   pollux::PolluxMessageResponse response;
   grpc::Status status = stub_->PolluxCommunication(&context, message, &response);
+  if (not status.ok()) {
+    spdlog::error("Error while sending \"polluxCommunication\": {}", status.error_message());
+    exit(-54);
+  }
   spdlog::info("PolluxCommunication::Response: {}", response.info());
+}
+
+void ZebulonPayloadClient::polluxReport(int id, const std::string& key, const std::string& value) {
+  grpc::ClientContext context;
+  pollux::PolluxReportMessage message;
+  message.set_origin(id_);
+  (*message.mutable_map())[key] = value;
+
+  pollux::PolluxStandardResponse response;
+  grpc::Status status = stub_->PolluxReport(&context, message, &response);
+  if (not status.ok()) {
+    spdlog::error("Error while sending \"polluxReport\": {}", status.error_message());
+    exit(-54);
+  }
+  spdlog::info("PolluxCommunication::Report: {}", response.info());
 }
 
 std::string ZebulonPayloadClient::getString() const {

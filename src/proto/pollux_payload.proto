@@ -20,6 +20,7 @@ service ZebulonPayload {
   rpc PayloadLoopEnd(PayloadLoopMessage) returns (PolluxStandardResponse) {}
   rpc PayloadInactive(PayloadInactiveMessage) returns (PolluxStandardResponse) {}
   rpc PolluxCommunication(PolluxMapMessage) returns (PolluxMessageResponse) {}
+  rpc PolluxReport(PolluxReportMessage) returns (PolluxStandardResponse) {}
 }
 
 message PayloadReadyMessage {

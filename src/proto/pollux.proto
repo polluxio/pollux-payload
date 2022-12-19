@@ -25,6 +25,11 @@ message PolluxMapMessage {
   map<string, PolluxMessageValue> map = 3; 
 }
 
+message PolluxReportMessage {
+  uint32 origin  = 1;
+  map<string, string> map = 2; 
+}
+
 message PolluxMessageResponse {
   string info = 1;
 }
