@@ -1,0 +1,17 @@
+FROM alpine:latest AS builder
+RUN apk --no-cache add ca-certificates
+RUN apk update && apk upgrade && \
+    apk add --no-cache cmake && \
+    apk add --no-cache make && \
+    apk add --no-cache g++ && \
+    apk add --no-cache protobuf-dev && \
+    apk add --no-cache grpc-dev
+
+WORKDIR /polluxapp
+COPY cmake cmake
+COPY src src
+COPY CMakeLists.txt .
+RUN cmake . && make -j$(nproc)
+
+
+#FROM pollux-zebulon:latest
