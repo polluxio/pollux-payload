@@ -1,8 +1,7 @@
 cmake_policy(SET CMP0048 NEW)
+cmake_minimum_required(VERSION 3.22)
 
 project(polluxapp)
-
-cmake_minimum_required(VERSION 3.22)
 
 set(CMAKE_CXX_STANDARD 20)
 
