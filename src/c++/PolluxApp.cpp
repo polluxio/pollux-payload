@@ -132,11 +132,12 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
 int main(int argc, char **argv) {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-  const char* const short_opts = "pin:hsa::";
+  const char* const short_opts = "pint:hsa::";
   const option long_opts[] = {
     {"port",          required_argument,  0,        'p'},
     {"id",            required_argument,  0,        'i'},
     {"partitions",    required_argument,  0,        'n'},
+    {"zebulon_ip",    optional_argument,  0,        't'},
     {"synchronized",  no_argument,        nullptr,  's'},
     {"alone",         no_argument,        nullptr,  'a'},
     {"help" ,         no_argument,        nullptr,  'h'},
@@ -144,6 +145,7 @@ int main(int argc, char **argv) {
   };
 
   int zebulonPort = -1;
+  std::string zebulonIP;
   int id = -1;
   int partitions = -1;
   bool synchronized = false;
@@ -159,6 +161,9 @@ int main(int argc, char **argv) {
       case 'p':
         zebulonPort = std::stoi(optarg);
         break;
+      case 't':
+	zebulonIP = optarg;
+	break;
       case 'i':
         id = std::stoi(optarg);
         break;
@@ -196,11 +201,13 @@ int main(int argc, char **argv) {
 
   std::string logFileName("pollux-app-" + std::to_string(id) + ".log");
   auto myLogger = spdlog::basic_logger_mt("pollux_logger", logFileName.c_str());
+  spdlog::flush_on(spdlog::level::info);
   spdlog::set_default_logger(myLogger);
   spdlog::flush_every(std::chrono::seconds(3));
   spdlog::info("########################################################");
   spdlog::info(logFileName);
   spdlog::info("########################################################");
+
   {
     std::ostringstream stream;
     for (int i=0; i<argc; i++) {
@@ -224,7 +231,16 @@ int main(int argc, char **argv) {
     //ServerAddress serverAddress = getAvailableAddress();
     ZebulonPayloadClient* zebulonClient = nullptr;
 
-    std::string zebulonAddress("localhost");
+    std::string zebulonAddress;
+    std::string localServerAddress;
+    ("localhost:0");
+    if (not zebulonIP.empty()) {
+      zebulonAddress = zebulonIP;
+      localServerAddress = zebulonIP + ":0";
+    } else {
+      zebulonAddress = "localhost";
+      localServerAddress = "localhost:0";
+    }
     zebulonAddress += ":" + std::to_string(zebulonPort);
 
     if (not alone) {
@@ -235,8 +251,7 @@ int main(int argc, char **argv) {
       );
     }
 
-    std::string localServerAddress("localhost:0");
-    //Logger::info("starting server on " + serverAddress.getString());
+    spdlog::info("starting server on " + localServerAddress);
     UserPayLoad userPayLoad;
     userPayLoad.setSynchronized(synchronized);
     PolluxPayloadService service(zebulonClient, userPayLoad);

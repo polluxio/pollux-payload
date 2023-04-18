@@ -15,7 +15,7 @@ COPY src src
 COPY CMakeLists.txt .
 RUN cmake . && make -j$(nproc)
 
-FROM pollux-zebulon:latest AS polluxapp
+FROM pollux-qarnot:latest AS polluxapp-qarnot
 RUN apt-get update && apt-get -y install libgrpc++
 WORKDIR /root
 COPY --from=builder /polluxapp/src/c++/polluxapp ./
