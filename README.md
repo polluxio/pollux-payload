@@ -10,6 +10,14 @@ Two langages are currently supported: C++ and Python. For each of them a sketch 
 Those application are provided with 
 
 ### C++
+Ubuntu dependencies:
+```bash
+sudo apt-get install cmake
+sudo apt-get install g++
+sudo apt-get install libboost-dev
+sudo apt-get install libgrpc++-dev
+
+```
 ### Python
 
 ## Pollux modes
