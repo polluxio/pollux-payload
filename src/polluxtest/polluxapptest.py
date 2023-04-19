@@ -6,7 +6,7 @@ import os
 import shutil
 import sys
 
-def run(partitions, commandLine, dir_name, synchronized, executor):
+def run(partitions, commandLine, dir_name, synchronized, executor, port):
   #create polluxtest dir, erase it first if it exists
   if os.path.exists(dir_name):
     shutil.rmtree(dir_name)
@@ -16,6 +16,8 @@ def run(partitions, commandLine, dir_name, synchronized, executor):
   topYamlPath = os.path.join(dir_name, topYamlName)
   topYaml = open(topYamlPath, 'w')
   topYaml.write('options:\n')
+  if mystring:
+    topYaml.write('  port:' + port + '\n')
   if synchronized:
     topYaml.write('  synchronized: true\n')
   topYaml.write('  executor: ' + executor + '\n')
@@ -51,6 +53,7 @@ def main() -> int:
   parser.add_argument("--command", required=True, help="payload command line")
   parser.add_argument("--not_synchronized", required=False, help="Disable Pollux synchronized mode", action='store_true')
   parser.add_argument("--executor", required=False, help="Choose executor", default="local")
+  parser.add_argument("--port", required=False, help="impose port", default="")
 
   args = parser.parse_args()
 
@@ -67,7 +70,7 @@ def main() -> int:
 
   logging.info("command line arguments:" + ''.join(" " + s  for s in sys.argv[1:]))
 
-  run(int(args.partitions), args.command, args.name, not args.not_synchronized, args.executor)
+  run(int(args.partitions), args.command, args.name, not args.not_synchronized, args.executor, args.port)
   logging.info("polluxapptest terminated")
   return 0
 

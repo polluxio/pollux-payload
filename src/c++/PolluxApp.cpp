@@ -137,7 +137,7 @@ int main(int argc, char **argv) {
     {"port",          required_argument,  0,        'p'},
     {"id",            required_argument,  0,        'i'},
     {"partitions",    required_argument,  0,        'n'},
-    {"zebulon_ip",    optional_argument,  0,        't'},
+    {"zebulon_ip",    required_argument,  0,        't'},
     {"synchronized",  no_argument,        nullptr,  's'},
     {"alone",         no_argument,        nullptr,  'a'},
     {"help" ,         no_argument,        nullptr,  'h'},
@@ -225,7 +225,7 @@ int main(int argc, char **argv) {
   try {
     int localID = id;
     otherIDs = std::vector<int>(partitions);
-    std::iota(otherIDs.begin(), otherIDs.end(), 0);
+    std::iota(otherIDs.begin(), otherIDs.end(), 1);
     otherIDs.erase(std::remove(otherIDs.begin(), otherIDs.end(), localID), otherIDs.end());
 
     //ServerAddress serverAddress = getAvailableAddress();
@@ -233,7 +233,6 @@ int main(int argc, char **argv) {
 
     std::string zebulonAddress;
     std::string localServerAddress;
-    ("localhost:0");
     if (not zebulonIP.empty()) {
       zebulonAddress = zebulonIP;
       localServerAddress = zebulonIP + ":0";
