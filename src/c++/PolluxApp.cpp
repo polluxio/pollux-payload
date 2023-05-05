@@ -1,4 +1,4 @@
-#include <getopt.h>
+#include <argparse/argparse.hpp>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -132,72 +132,45 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
 int main(int argc, char **argv) {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-  const char* const short_opts = "pint:hsa::";
-  const option long_opts[] = {
-    {"port",          required_argument,  0,        'p'},
-    {"id",            required_argument,  0,        'i'},
-    {"partitions",    required_argument,  0,        'n'},
-    {"zebulon_ip",    required_argument,  0,        't'},
-    {"synchronized",  no_argument,        nullptr,  's'},
-    {"alone",         no_argument,        nullptr,  'a'},
-    {"help" ,         no_argument,        nullptr,  'h'},
-    {nullptr,         no_argument,        nullptr,  0}
-  };
+  argparse::ArgumentParser program("polluxapp");
 
-  int zebulonPort = -1;
+  program.add_argument("-p", "--port")
+    .scan<'d', int>()
+    .required()
+    .help("imposed port");
+  program.add_argument("-i", "--id")
+    .scan<'d', int>()
+    .required()
+    .help("local id");
+  program.add_argument("-n", "--partitions")
+    .scan<'d', int>()
+    .required()
+    .required()
+    .help("number of partitions");
+  program.add_argument("-t", "--zebulon_ip")
+    .help("impose zebulon ip");
+  program.add_argument("-s", "--synchronized")
+    .default_value(false)
+    .implicit_value(true)
+    .help("synchronized mode");
+
+
+  try {
+    program.parse_args(argc, argv);
+  } catch (const std::runtime_error& err) {
+    std::cerr << err.what() << std::endl;
+    std::cerr << program;
+    return 1;
+  }
+
+  int zebulonPort = program.get<int>("--port");
+  int id = program.get<int>("--id");
+  int partitions = program.get<int>("--partitions");
   std::string zebulonIP;
-  int id = -1;
-  int partitions = -1;
-  bool synchronized = false;
-  bool alone = false;
-
-  while (true) {
-    const auto opt = getopt_long(argc, argv, short_opts, long_opts, nullptr);
-    if (opt == -1) {
-      break;
-    }
-
-    switch (opt) {
-      case 'p':
-        zebulonPort = std::stoi(optarg);
-        break;
-      case 't':
-	zebulonIP = optarg;
-	break;
-      case 'i':
-        id = std::stoi(optarg);
-        break;
-      case 'n':
-        partitions = std::stoi(optarg);
-        break;
-      case 'a':
-        alone = true;
-        break;
-      case 's':
-        synchronized = true;
-        break;
-      case 'h':
-        printHelp();
-        break;
-      default:
-        spdlog::error("{} is not a recognized option, recognized options are:", opt);
-        printHelp();
-        break;
-    }
+  if (auto zebulonIPOption = program.present("--zebulon_ip")) {
+    zebulonIP = *zebulonIPOption;
   }
-
-  if (zebulonPort == -1) {
-    spdlog::error("port argument is mandatory");
-    printHelp();
-  }
-  if (id == -1) {
-    spdlog::error("id argument is mandatory");
-    printHelp();
-  }
-  if (partitions == -1) {
-    spdlog::error("partitions argument is mandatory");
-    printHelp();
-  }
+  bool synchronized = program["--synchronized"] == true;
 
   std::string logFileName("pollux-app-" + std::to_string(id) + ".log");
   auto myLogger = spdlog::basic_logger_mt("pollux_logger", logFileName.c_str());
@@ -242,13 +215,11 @@ int main(int argc, char **argv) {
     }
     zebulonAddress += ":" + std::to_string(zebulonPort);
 
-    if (not alone) {
-      spdlog::info("creating local client");
-      zebulonClient = new ZebulonPayloadClient(
-        grpc::CreateChannel(zebulonAddress, grpc::InsecureChannelCredentials()),
-        localID
-      );
-    }
+    spdlog::info("creating local client");
+    zebulonClient = new ZebulonPayloadClient(
+      grpc::CreateChannel(zebulonAddress, grpc::InsecureChannelCredentials()),
+      localID
+    );
 
     spdlog::info("starting server on " + localServerAddress);
     UserPayLoad userPayLoad;
@@ -274,11 +245,9 @@ int main(int argc, char **argv) {
       throw PolluxAppException(message.str());
     }
 
-    if (not alone) {
-      spdlog::info("contacting zebulon on {} and sending ready message", zebulonAddress);
-      //I'm alive send message
-      zebulonClient->sendPayloadReady(serverPort);
-    }
+    spdlog::info("contacting zebulon on {} and sending ready message", zebulonAddress);
+    //I'm alive send message
+    zebulonClient->sendPayloadReady(serverPort);
 
     //create and run local server
     spdlog::info("Server listening on {}", std::to_string(serverPort));
