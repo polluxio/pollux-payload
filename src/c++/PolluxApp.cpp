@@ -145,8 +145,11 @@ int main(int argc, char **argv) {
   program.add_argument("-n", "--partitions")
     .scan<'d', int>()
     .required()
-    .required()
     .help("number of partitions");
+  program.add_argument("-f", "--first_partition_id")
+    .scan<'d', int>()
+    .default_value(0)
+    .help("first partition id");
   program.add_argument("-t", "--zebulon_ip")
     .help("impose zebulon ip");
   program.add_argument("-s", "--synchronized")
@@ -166,6 +169,7 @@ int main(int argc, char **argv) {
   int zebulonPort = program.get<int>("--port");
   int id = program.get<int>("--id");
   int partitions = program.get<int>("--partitions");
+  int firstPartitionID = program.get<int>("--first_partition_id");
   std::string zebulonIP;
   if (auto zebulonIPOption = program.present("--zebulon_ip")) {
     zebulonIP = *zebulonIPOption;
@@ -198,7 +202,7 @@ int main(int argc, char **argv) {
   try {
     int localID = id;
     otherIDs = std::vector<int>(partitions);
-    std::iota(otherIDs.begin(), otherIDs.end(), 1);
+    std::iota(otherIDs.begin(), otherIDs.end(), firstPartitionID);
     otherIDs.erase(std::remove(otherIDs.begin(), otherIDs.end(), localID), otherIDs.end());
 
     //ServerAddress serverAddress = getAvailableAddress();

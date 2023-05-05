@@ -16,7 +16,7 @@ def run(partitions, commandLine, dir_name, synchronized, executor, port):
   topYamlPath = os.path.join(dir_name, topYamlName)
   topYaml = open(topYamlPath, 'w')
   topYaml.write('options:\n')
-  if mystring:
+  if port:
     topYaml.write('  port:' + port + '\n')
   if synchronized:
     topYaml.write('  synchronized: true\n')
@@ -47,7 +47,7 @@ class ArgumentParser(argparse.ArgumentParser):
     self.exit(2, '%s: error: %s\n' % (self.prog, message))
 
 def main() -> int:
-  parser = ArgumentParser(prog='polluxapptest', exit_on_error=False)
+  parser = ArgumentParser(prog='polluxapptest')
   parser.add_argument("--name", required=False, help="created directory name", default="polluxapptest")
   parser.add_argument("--partitions", required=True, help="number of partitions")
   parser.add_argument("--command", required=True, help="payload command line")
