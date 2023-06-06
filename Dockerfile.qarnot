@@ -21,4 +21,3 @@ RUN apt-get update && apt-get -y install libgrpc++
 WORKDIR /root
 COPY --from=builder /polluxapp/src/c++/polluxapp ./
 EXPOSE 50000
-#ENTRYPOINT [ "./zebulon" ] 
