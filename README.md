@@ -15,8 +15,8 @@ Ubuntu dependencies:
 sudo apt-get install cmake
 sudo apt-get install g++
 sudo apt-get install libboost-dev
+sudo apt-get install protobuf-compiler-grpc
 sudo apt-get install libgrpc++-dev
-
 ```
 ### Python
 
