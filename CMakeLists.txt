@@ -5,14 +5,7 @@ project(polluxapp)
 
 set(CMAKE_CXX_STANDARD 20)
 
-include(FetchContent)
-#fetch argparse v2.9
-FetchContent_Declare(
-    argparse
-    GIT_REPOSITORY https://github.com/p-ranav/argparse.git
-    GIT_TAG 997da9255618311d1fcb0135ce86022729d1f1cb
-)
-FetchContent_MakeAvailable(argparse)
+add_subdirectory(thirdparty)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
