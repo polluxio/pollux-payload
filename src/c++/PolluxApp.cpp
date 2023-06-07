@@ -26,7 +26,6 @@ void printHelp() {
     << "--id <id>           Pollux payload id" << std::endl
     << "--partitions <nb>   Global number of partitions" << std::endl 
     << "--help              Displays this help and exit" << std::endl
-    << "--synchronized      Synchronous mode" << std::endl
     << "--alone:            Do not attempt to connect to Pollux master port (only useful for debugging)" << std::endl;
   exit(1);
 }
@@ -92,9 +91,10 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
 
     grpc::Status Start(
       grpc::ServerContext* context,
-      const pollux::PayloadStartMessage* messsage, 
+      const pollux::PayloadStartMessage* message, 
       pollux::PolluxStandardResponse* response) override {
       spdlog::info("Start payload received");
+      userPayLoad_.setSynchronized(message->synchronized());
       std::thread mainLoopThread(&UserPayLoad::loop, &userPayLoad_, zebulonClient_);
       mainLoopThread.detach();
       response->set_info("Payload has been started");
@@ -152,11 +152,6 @@ int main(int argc, char **argv) {
     .help("first partition id");
   program.add_argument("-t", "--zebulon_ip")
     .help("impose zebulon ip");
-  program.add_argument("-s", "--synchronized")
-    .default_value(false)
-    .implicit_value(true)
-    .help("synchronized mode");
-
 
   try {
     program.parse_args(argc, argv);
@@ -174,7 +169,6 @@ int main(int argc, char **argv) {
   if (auto zebulonIPOption = program.present("--zebulon_ip")) {
     zebulonIP = *zebulonIPOption;
   }
-  bool synchronized = program["--synchronized"] == true;
 
   std::string logFileName("pollux-app-" + std::to_string(id) + ".log");
   auto myLogger = spdlog::basic_logger_mt("pollux_logger", logFileName.c_str());
@@ -193,11 +187,6 @@ int main(int argc, char **argv) {
     spdlog::info("Command line: {}", stream.str());
   }
 
-  if (synchronized) {
-    spdlog::info("Synchronized mode is on");
-  } else {
-    spdlog::info("Synchronized mode is off");
-  }
 
   try {
     int localID = id;
@@ -227,7 +216,6 @@ int main(int argc, char **argv) {
 
     spdlog::info("starting server on " + localServerAddress);
     UserPayLoad userPayLoad;
-    userPayLoad.setSynchronized(synchronized);
     PolluxPayloadService service(zebulonClient, userPayLoad);
     grpc::ServerBuilder builder;
     //AddListeningPort last optional arg: If not nullptr, gets populated with the port number bound to the grpc::Server
