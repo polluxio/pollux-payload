@@ -18,25 +18,18 @@
 
 namespace {
 
-std::vector<int> otherIDs;
-
-void printHelp() {
-  std::cout
-    << "--port <p>          Pollux master port" << std::endl
-    << "--id <id>           Pollux payload id" << std::endl
-    << "--partitions <nb>   Global number of partitions" << std::endl 
-    << "--help              Displays this help and exit" << std::endl
-    << "--alone:            Do not attempt to connect to Pollux master port (only useful for debugging)" << std::endl;
-  exit(1);
-}
-
 class UserPayLoad {
   public:
-    UserPayLoad() = default;
+    UserPayLoad(int localID): localID_(localID) {}
     UserPayLoad(const UserPayLoad&) = default;
 
     void setControl(const pollux::PolluxControl& control) {
       control_ = control;
+      for (auto id: control_.partids()) {
+        if (id != localID_) {
+          otherIDs_.push_back(id);
+        }
+      }
     }
 
     void loop(ZebulonPayloadClient* client) {
@@ -46,8 +39,8 @@ class UserPayLoad {
         using namespace std::chrono_literals;
         //use more random sleep
         std::this_thread::sleep_for(5000ms);
-        int pick = rand() % otherIDs.size();
-        int id = otherIDs[pick];
+        int pick = rand() % otherIDs_.size();
+        int id = otherIDs_[pick];
         if (reporting_) {
           spdlog::info("Reporting {}", nbMessages);
           client->polluxReport(id, "key", "value");
@@ -66,12 +59,14 @@ class UserPayLoad {
         }
       }
     }
+
   private:
+    int                     localID_;
+    std::vector<int>        otherIDs_;
     pollux::PolluxControl   control_;
-    bool                    reporting_    = true;
+    bool                    reporting_ = true;
     int                     iteration_ = 0;
 };
-
 
 class PolluxPayloadService final : public pollux::PolluxPayload::Service {
   public:
@@ -124,7 +119,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
     }
   private:
     ZebulonPayloadClient* zebulonClient_  {nullptr};
-    UserPayLoad           userPayLoad_    {};
+    UserPayLoad           userPayLoad_;
 };
 
 }
@@ -142,14 +137,6 @@ int main(int argc, char **argv) {
     .scan<'d', int>()
     .required()
     .help("local id");
-  program.add_argument("-n", "--partitions")
-    .scan<'d', int>()
-    .required()
-    .help("number of partitions");
-  program.add_argument("-f", "--first_partition_id")
-    .scan<'d', int>()
-    .default_value(0)
-    .help("first partition id");
   program.add_argument("-t", "--zebulon_ip")
     .help("impose zebulon ip");
 
@@ -163,8 +150,6 @@ int main(int argc, char **argv) {
 
   int zebulonPort = program.get<int>("--port");
   int id = program.get<int>("--id");
-  int partitions = program.get<int>("--partitions");
-  int firstPartitionID = program.get<int>("--first_partition_id");
   std::string zebulonIP;
   if (auto zebulonIPOption = program.present("--zebulon_ip")) {
     zebulonIP = *zebulonIPOption;
@@ -190,9 +175,6 @@ int main(int argc, char **argv) {
 
   try {
     int localID = id;
-    otherIDs = std::vector<int>(partitions);
-    std::iota(otherIDs.begin(), otherIDs.end(), firstPartitionID);
-    otherIDs.erase(std::remove(otherIDs.begin(), otherIDs.end(), localID), otherIDs.end());
 
     //ServerAddress serverAddress = getAvailableAddress();
     ZebulonPayloadClient* zebulonClient = nullptr;
@@ -215,7 +197,7 @@ int main(int argc, char **argv) {
     );
 
     spdlog::info("starting server on " + localServerAddress);
-    UserPayLoad userPayLoad;
+    UserPayLoad userPayLoad(localID);
     PolluxPayloadService service(zebulonClient, userPayLoad);
     grpc::ServerBuilder builder;
     //AddListeningPort last optional arg: If not nullptr, gets populated with the port number bound to the grpc::Server
