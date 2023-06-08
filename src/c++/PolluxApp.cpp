@@ -35,12 +35,12 @@ class UserPayLoad {
     UserPayLoad() = default;
     UserPayLoad(const UserPayLoad&) = default;
 
-    void setSynchronized(bool mode) {
-      synchronized_ = mode;
+    void setControl(const pollux::PolluxControl& control) {
+      control_ = control;
     }
 
     void loop(ZebulonPayloadClient* client) {
-      spdlog::info("Main loop started iteration: {} synchronized: {}", iteration_, synchronized_);
+      spdlog::info("Main loop started iteration: {} synchronized: {}", iteration_, control_.synchronized());
       int nbMessages = 0;
       while (1) { //4x communication
         using namespace std::chrono_literals;
@@ -54,11 +54,11 @@ class UserPayLoad {
         }
         spdlog::info("Message {}", nbMessages++);
         client->polluxCommunication(id, "key", "value");
-        if (synchronized_ and nbMessages > 4) {
+        if (control_.synchronized() and nbMessages > 4) {
           break;
         }
       }
-      if (synchronized_) {
+      if (control_.synchronized()) {
         if (iteration_ > 5) {
           client->sendPayloadLoopEnd(iteration_++);
         } else {
@@ -67,9 +67,9 @@ class UserPayLoad {
       }
     }
   private:
-    bool  synchronized_ = false;
-    bool  reporting_    = true;
-    int   iteration_ = 0;
+    pollux::PolluxControl   control_;
+    bool                    reporting_    = true;
+    int                     iteration_ = 0;
 };
 
 
@@ -94,7 +94,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       const pollux::PayloadStartMessage* message, 
       pollux::PolluxStandardResponse* response) override {
       spdlog::info("Start payload received");
-      userPayLoad_.setSynchronized(message->synchronized());
+      userPayLoad_.setControl(message->control());
       std::thread mainLoopThread(&UserPayLoad::loop, &userPayLoad_, zebulonClient_);
       mainLoopThread.detach();
       response->set_info("Payload has been started");

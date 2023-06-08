@@ -40,8 +40,7 @@ message PayloadInactiveMessage {
 
 message PayloadStartMessage {
   string info = 1;
-  bool   synchronized = 2;
-  uint32 masterID = 3;
+  pollux.PolluxControl control = 2;
 }
 
 message PayloadTerminateMessage {

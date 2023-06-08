@@ -12,6 +12,11 @@ message PolluxVersion {
   Version version = 1;
 }
 
+message PolluxControl {
+  repeated uint32 partIDs = 1;
+  bool synchronized = 2;
+}
+
 message PolluxMessageValue {
   oneof value {
     string strValue = 1;
