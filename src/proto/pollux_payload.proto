@@ -10,6 +10,7 @@ import "pollux.proto";
 service PolluxPayload {
   rpc PolluxCommunication(PolluxMapMessage) returns (PolluxMessageResponse) {}
   rpc Start(PayloadStartMessage) returns (PolluxStandardResponse) {}
+  rpc Iterate(PayloadIterateMessage) returns (PolluxStandardResponse) {}
   rpc Terminate(PayloadTerminateMessage) returns (EmptyResponse) {}
 }
 
@@ -41,6 +42,10 @@ message PayloadInactiveMessage {
 message PayloadStartMessage {
   string info = 1;
   pollux.PolluxControl control = 2;
+}
+
+message PayloadIterateMessage {
+  string info = 1;
 }
 
 message PayloadTerminateMessage {
