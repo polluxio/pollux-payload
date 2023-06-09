@@ -18,6 +18,16 @@ sudo apt-get install libboost-dev
 sudo apt-get install protobuf-compiler-grpc
 sudo apt-get install libgrpc++-dev
 ```
+Copy relevant files:
+```bash
+#create a thirdparty dir
+mkdir thirdparty
+git submodule add https://github.com/gabime/spdlog
+#checkout latest release
+git checkout ad0e89c
+
+```
+
 ### Python
 
 ## Pollux modes
