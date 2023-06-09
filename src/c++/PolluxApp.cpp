@@ -101,7 +101,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       grpc::ServerContext* context,
       const pollux::PayloadIterateMessage* message, 
       pollux::PolluxStandardResponse* response) override {
-      spdlog::info("Iterate payload received");
+      spdlog::info("Iterate payload received, iteration: {}", message->iteration());
       std::thread mainLoopThread(&UserPayLoad::loop, userPayLoad_, zebulonClient_);
       mainLoopThread.detach();
       response->set_info("Payload next iteration");

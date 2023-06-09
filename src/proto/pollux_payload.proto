@@ -46,6 +46,7 @@ message PayloadStartMessage {
 
 message PayloadIterateMessage {
   string info = 1;
+  uint32 iteration = 2;
 }
 
 message PayloadTerminateMessage {
