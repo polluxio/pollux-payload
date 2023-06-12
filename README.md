@@ -22,6 +22,7 @@ Copy relevant files:
 ```bash
 #create a thirdparty dir
 mkdir thirdparty
+cd thirdparty
 git submodule add https://github.com/gabime/spdlog
 #checkout latest release
 cd spdlog
