@@ -24,8 +24,12 @@ Copy relevant files:
 mkdir thirdparty
 git submodule add https://github.com/gabime/spdlog
 #checkout latest release
+cd spdlog
 git checkout ad0e89c
-
+cd ..
+git submodule add https://github.com/p-ranav/argparse
+cd argparse
+git checkout 997da92
 ```
 
 ### Python
