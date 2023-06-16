@@ -20,4 +20,7 @@ FROM pollux-qarnot:latest AS polluxapp-qarnot
 RUN apt-get update && apt-get -y install libgrpc++
 WORKDIR /root
 COPY --from=builder /polluxapp/src/c++/polluxapp ./
+#For Pollux REST (on ID:0) 
+EXPOSE 443 
+#For Pollux Communication
 EXPOSE 50000
