@@ -80,7 +80,10 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       const pollux::PayloadTerminateMessage* messsage, 
       pollux::EmptyResponse* response) override {
       //Terminate local app
-      //should the server be gracefully shutdown ??  
+      //should the server be gracefully shutdown ??
+      if (server_) {
+        server_->Shutdown();
+      }
       return grpc::Status::OK;
     }
 
@@ -129,8 +132,13 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       response->set_info(logMessage.str() + " understood");
       return grpc::Status::OK;
     }
+
+    void setServer(grpc::Server* server) {
+      server_ = server;
+    }
   private:
     ZebulonPayloadClient* zebulonClient_  {nullptr};
+    grpc::Server*         server_         {nullptr};
     UserPayLoad*          userPayLoad_;
 };
 
@@ -224,6 +232,7 @@ int main(int argc, char **argv) {
     //builder.AddChannelArgument(GRPC_ARG_MAX_CONNECTION_IDLE_MS , 1000);
     builder.RegisterService(&service);
     std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+    service.setServer(server.get());
     spdlog::info("starting server on {}", std::to_string(serverPort));
     if (not server.get()) {
       std::ostringstream message;
