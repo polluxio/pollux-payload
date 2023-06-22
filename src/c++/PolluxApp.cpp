@@ -79,9 +79,11 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       grpc::ServerContext* context,
       const pollux::PayloadTerminateMessage* messsage, 
       pollux::EmptyResponse* response) override {
+      spdlog::info("Received terminate");
       //Terminate local app
       //should the server be gracefully shutdown ??
       if (server_) {
+        spdlog::info("Shutting down server");
         server_->Shutdown();
       }
       return grpc::Status::OK;
