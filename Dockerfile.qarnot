@@ -17,10 +17,12 @@ COPY CMakeLists.txt .
 RUN cmake . && make -j$(nproc)
 
 FROM pollux-qarnot:latest AS polluxapp-qarnot
-RUN apt-get update && apt-get -y install libgrpc++
+RUN apt-get update && apt-get -y install libgrpc++ openssh-server
+RUN mkdir /var/run/sshd
+RUN sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+
 WORKDIR /root
 COPY --from=builder /polluxapp/src/c++/polluxapp ./
-#For Pollux REST (on ID:0) 
-EXPOSE 443 
+EXPOSE 22 
 #For Pollux Communication
 EXPOSE 50000
