@@ -21,10 +21,10 @@ namespace {
 
 std::promise<void> shutdownRequested;
 
-class UserPayLoad {
+class PolluxPayLoad {
   public:
-    UserPayLoad(int localID): localID_(localID) {}
-    UserPayLoad(const UserPayLoad&) = delete;
+    PolluxPayLoad(int localID): localID_(localID) {}
+    PolluxPayLoad(const PolluxPayLoad&) = delete;
 
     void setControl(const pollux::PolluxControl& control) {
       control_ = control;
@@ -75,8 +75,8 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
   public:
     PolluxPayloadService() = delete;
     PolluxPayloadService(const PolluxPayloadService&) = delete;
-    PolluxPayloadService(ZebulonPayloadClient* client, UserPayLoad* payload):
-      userPayLoad_(payload),
+    PolluxPayloadService(ZebulonPayloadClient* client, PolluxPayLoad* payload):
+      polluxPayLoad_(payload),
       zebulonClient_(client) {}
     grpc::Status Terminate(
       grpc::ServerContext* context,
@@ -92,9 +92,9 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       const pollux::PayloadStartMessage* message, 
       pollux::PolluxStandardResponse* response) override {
       spdlog::info("Start payload received");
-      userPayLoad_->setControl(message->control());
+      polluxPayLoad_->setControl(message->control());
 
-      std::thread mainLoopThread(&UserPayLoad::loop, userPayLoad_, zebulonClient_);
+      std::thread mainLoopThread(&PolluxPayLoad::loop, polluxPayLoad_, zebulonClient_);
       mainLoopThread.detach();
       response->set_info("Payload has been started");
       return grpc::Status::OK;
@@ -105,7 +105,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       const pollux::PayloadIterateMessage* message, 
       pollux::PolluxStandardResponse* response) override {
       spdlog::info("Iterate payload received, iteration: {}", message->iteration());
-      std::thread mainLoopThread(&UserPayLoad::loop, userPayLoad_, zebulonClient_);
+      std::thread mainLoopThread(&PolluxPayLoad::loop, polluxPayLoad_, zebulonClient_);
       mainLoopThread.detach();
       response->set_info("Payload next iteration");
       return grpc::Status::OK;
@@ -139,7 +139,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
   private:
     ZebulonPayloadClient* zebulonClient_  {nullptr};
     grpc::Server*         server_         {nullptr};
-    UserPayLoad*          userPayLoad_;
+    PolluxPayLoad*        polluxPayLoad_;
 };
 
 }
@@ -217,8 +217,8 @@ int main(int argc, char **argv) {
     );
 
     spdlog::info("starting server on " + localServerAddress);
-    UserPayLoad userPayLoad(localID);
-    PolluxPayloadService service(zebulonClient, &userPayLoad);
+    PolluxPayLoad polluxPayLoad(localID);
+    PolluxPayloadService service(zebulonClient, &polluxPayLoad);
     grpc::ServerBuilder builder;
     //AddListeningPort last optional arg: If not nullptr, gets populated with the port number bound to the grpc::Server
     //for the corresponding endpoint after it is successfully bound by BuildAndStart(), 0 otherwise.
