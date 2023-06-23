@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <numeric>
+#include <future>
 
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h" // support for basic file logging
@@ -17,6 +18,8 @@
 #include "PolluxAppException.h"
 
 namespace {
+
+std::promise<void> shutdownRequested;
 
 class UserPayLoad {
   public:
@@ -79,21 +82,8 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       grpc::ServerContext* context,
       const pollux::PayloadTerminateMessage* messsage, 
       pollux::EmptyResponse* response) override {
-      struct AfterReturn {
-        AfterReturn(grpc::Server* server): server_(server) {}
-        ~AfterReturn() {
-          if (server_) {
-            spdlog::info("Shutting down server");
-            //wait 5s
-            using namespace std::chrono_literals;
-            std::this_thread::sleep_for(5s);
-            server_->Shutdown();
-          }
-        }
-        grpc::Server* server_;
-      };
-      AfterReturn afterReturn(server_);
       spdlog::info("Received terminate");
+      shutdownRequested.set_value();
       return grpc::Status::OK;
     }
 
@@ -254,9 +244,18 @@ int main(int argc, char **argv) {
     //I'm alive send message
     zebulonClient->sendPayloadReady(serverPort);
 
-    //create and run local server
-    spdlog::info("Server listening on {}", std::to_string(serverPort));
-    server->Wait(); //blocking
+    auto serverWait = [&]() {
+      //create and run local server
+      spdlog::info("Server listening on {}", std::to_string(serverPort));
+      server->Wait(); //blocking
+    };
+
+    std::thread serverThread(serverWait);
+
+    auto f = shutdownRequested.get_future();
+    f.wait();
+    server->Shutdown();
+    serverThread.join();
 
     //we get there if PolluxPayloadService was terminated
     spdlog::info("Server {} terminated", std::to_string(serverPort));
