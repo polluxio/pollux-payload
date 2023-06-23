@@ -84,6 +84,9 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
         ~AfterReturn() {
           if (server_) {
             spdlog::info("Shutting down server");
+            //wait 5s
+            using namespace std::chrono_literals;
+            std::this_thread::sleep_for(5s);
             server_->Shutdown();
           }
         }
