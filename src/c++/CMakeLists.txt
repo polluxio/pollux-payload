@@ -2,7 +2,7 @@ add_subdirectory(thirdparty)
 
 set (sources
   common/ZebulonPayloadClient.cpp
-  PolluxApp.cpp
+  PolluxPayload.cpp
 )
 
 add_executable(polluxapp ${sources})

@@ -15,7 +15,7 @@
 #include "pollux_payload.grpc.pb.h"
 
 #include "ZebulonPayloadClient.h"
-#include "PolluxAppException.h"
+#include "PolluxPayloadException.h"
 
 namespace {
 
@@ -237,7 +237,7 @@ int main(int argc, char **argv) {
     if (not server.get()) {
       std::ostringstream message;
       message << "GRPC Server could not be started on " << std::to_string(serverPort);
-      throw PolluxAppException(message.str());
+      throw PolluxPayloadException(message.str());
     }
 
     spdlog::info("contacting zebulon on {} and sending ready message", zebulonAddress);
@@ -264,8 +264,8 @@ int main(int argc, char **argv) {
 
     // Optional:  Delete all global objects allocated by libprotobuf.
     google::protobuf::ShutdownProtobufLibrary();
-  } catch (PolluxAppException& e) {
-    spdlog::error("PolluxAppException: {}", e.getReason());
+  } catch (PolluxPayloadException& e) {
+    spdlog::error("PolluxPayloadException: {}", e.getReason());
   } catch (std::exception& e) {
     spdlog::error(e.what());
   }
