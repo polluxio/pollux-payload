@@ -24,5 +24,10 @@ RUN sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_confi
 WORKDIR /root
 COPY --from=builder /polluxapp/src/c++/polluxapp ./
 EXPOSE 22 
+ENV GRPC_TRACE=all
+ENV GRPC_VERBOSITY=DEBUG
+ENV GRPC_GO_LOG_VERBOSITY_LEVEL=99
+ENV GRPC_GO_LOG_SEVERITY_LEVEL=info
+
 #For Pollux Communication
 EXPOSE 50000
