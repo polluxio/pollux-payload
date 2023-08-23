@@ -21,8 +21,10 @@ RUN apt-get update && apt-get -y install libgrpc++ openssh-server
 RUN mkdir /var/run/sshd
 RUN sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 
-ENV GRPC_VERBOSITY=debug
-ENV GRPC_TRACE=server_channel,client_channel_call
+ENV GRPC_TRACE=all
+ENV GRPC_VERBOSITY=DEBUG
+ENV GRPC_GO_LOG_VERBOSITY_LEVEL=99
+ENV GRPC_GO_LOG_SEVERITY_LEVEL=info
 WORKDIR /root
 COPY --from=builder /polluxapp/src/c++/polluxapp ./
 EXPOSE 22 
