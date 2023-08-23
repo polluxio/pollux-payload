@@ -93,7 +93,6 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       pollux::PolluxStandardResponse* response) override {
       spdlog::info("Start payload received");
       polluxPayLoad_->setControl(message->control());
-
       std::thread mainLoopThread(&PolluxPayLoad::loop, polluxPayLoad_, zebulonClient_);
       mainLoopThread.detach();
       response->set_info("Payload has been started");
@@ -132,7 +131,6 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       response->set_info(logMessage.str() + " understood");
       return grpc::Status::OK;
     }
-
     void setServer(grpc::Server* server) {
       server_ = server;
     }
