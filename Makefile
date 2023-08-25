@@ -1,3 +1,5 @@
+all: build-image tag-image push-image
+
 build-image:
 	sudo docker build --target polluxapp --file Dockerfile . -t polluxapp
 
@@ -9,5 +11,3 @@ tag-image:
 
 push-image:
 	sudo docker push christophealex/polluxapp
-
-all: build-image tag-image push-image
