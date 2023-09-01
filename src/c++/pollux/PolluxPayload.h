@@ -8,6 +8,7 @@ class PolluxPayload {
     PolluxPayload()=default;
     PolluxPayload(const PolluxPayload&)=delete;
 
+    enum UserOptionType { LONG, STRING };
     using UserOptionValue = std::variant<long, std::string>;
     using UserOptions = std::map<std::string, UserOptionValue>;
 
