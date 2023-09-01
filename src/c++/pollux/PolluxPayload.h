@@ -16,6 +16,9 @@ class PolluxPayload {
     std::vector<int> getOtherIDs() const { return otherIDs_; }
 
     UserOptions getUserOptions() const { return userOptions_; }
+    //returns nullptr if does not exist
+    //if found: returns ptr to option
+    UserOptionValue* getUserOptionValue(const std::string& name);
 
     bool isSynchronized() const { return control_.synchronized(); } 
 

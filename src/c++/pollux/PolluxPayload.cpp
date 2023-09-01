@@ -16,3 +16,11 @@ void PolluxPayload::setControl(const pollux::PolluxControl& control) {
     }
   }
 }
+
+PolluxPayload::UserOptionValue* PolluxPayload::getUserOptionValue(const std::string& name) {
+  auto uoit = userOptions_.find(name);
+  if (uoit != userOptions_.end()) {
+    return &uoit->second;
+  }
+  return nullptr;
+}
