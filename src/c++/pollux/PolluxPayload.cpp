@@ -1,5 +1,7 @@
 #include "PolluxPayload.h"
 
+#include "PolluxPayloadException.h"
+
 void PolluxPayload::setControl(const pollux::PolluxControl& control) {
   control_ = control;
   for (auto id: control_.partids()) {
@@ -9,10 +11,15 @@ void PolluxPayload::setControl(const pollux::PolluxControl& control) {
   }
   for (auto const& [name, value]: control.useroptions()) {
     //check for collision
-    if (value.has_strvalue()) {
+    switch(value.value_case()) {
+      case pollux::PolluxUserOptionValue::kStrValue:
         userOptions_[name] = value.strvalue(); 
-    } else if (value.has_int64value()) {
+        break;
+      case pollux::PolluxUserOptionValue::kInt64Value:
         userOptions_[name] = value.int64value(); 
+        break;
+      default:
+        throw PolluxPayloadException("Unset user option value");
     }
   }
 }

@@ -1,6 +1,8 @@
 #ifndef __POLLUX_PAYLOAD_H_
 #define __POLLUX_PAYLOAD_H_
 
+#include <variant>
+
 #include "ZebulonPayloadClient.h"
 
 class PolluxPayload {
