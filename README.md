@@ -1,8 +1,20 @@
-# polluxapp
-Pollux application example
+<div align="center">
+<img width="150" alt="Pollux Logo" src="./docs/images/pollux.jpg"><h1>Pollux</h1>
+</div>
+
+
+# pollux-payload
 ## Introduction
-polluxapp provides examples of applications using the Pollux tool. 
+Contains Pollux Payload libraries and Examples.
 ## Pollux installation
+```bash
+git submodule update --init --recursive
+```
+
+
+
+
+
 ## Pollux testing
 
 ## Pollux application writing
