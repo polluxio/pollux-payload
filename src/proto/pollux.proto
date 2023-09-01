@@ -12,15 +12,17 @@ message PolluxVersion {
   Version version = 1;
 }
 
-message PolluxUserOption {
-  string name = 1;
-  string value = 2;
+message PolluxUserOptionValue {
+  oneof value {
+    string strValue = 1;
+    int64 int64Value = 2;
+  }
 }
 
 message PolluxControl {
   repeated uint32 partIDs = 1;
   bool synchronized = 2;
-  repeated PolluxUserOption userOptions = 3;
+  map<string, PolluxUserOptionValue> userOptions = 3; 
 }
 
 message PolluxMessageValue {
