@@ -8,28 +8,27 @@ class PolluxPayload {
     PolluxPayload()=default;
     PolluxPayload(const PolluxPayload&)=delete;
 
+    using UserOptionValue = std::variant<long, std::string>;
+    using UserOptions = std::map<std::string, UserOptionValue>;
+
     void setLocalID(int localID) { localID_ = localID; }
     int getLocalID() const { return localID_; }
     std::vector<int> getOtherIDs() const { return otherIDs_; }
+
+    UserOptions getUserOptions() const { return userOptions_; }
 
     bool isSynchronized() const { return control_.synchronized(); } 
 
     //Implemented by final user
     virtual void loop(ZebulonPayloadClient* client) =0;
 
-    void setControl(const pollux::PolluxControl& control) {
-      control_ = control;
-      for (auto id: control_.partids()) {
-        if (id != localID_) {
-          otherIDs_.push_back(id);
-        }
-      }
-    }
+    void setControl(const pollux::PolluxControl& control);
 
   private:
-    int                     localID_;
-    std::vector<int>        otherIDs_;
-    pollux::PolluxControl   control_;
+    int                     localID_      {-1};
+    std::vector<int>        otherIDs_     {};
+    pollux::PolluxControl   control_      {};
+    UserOptions             userOptions_  {};
 };
 
 #endif /* __POLLUX_PAYLOAD_H_ */

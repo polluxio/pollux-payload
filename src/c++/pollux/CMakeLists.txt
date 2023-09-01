@@ -1,6 +1,7 @@
 set (sources
   ZebulonPayloadClient.cpp 
   PolluxMethods.cpp
+  PolluxPayload.cpp
 )
 
 add_library(pollux ${sources})
