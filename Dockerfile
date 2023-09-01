@@ -9,7 +9,7 @@ RUN apt-get update && apt-get -y install \
     protobuf-compiler-grpc \
     libgrpc++-dev
 
-WORKDIR /polluxapp
+WORKDIR /pollux-payload
 COPY cmake cmake
 COPY src src
 COPY thirdparty thirdparty
@@ -26,7 +26,7 @@ ENV GRPC_VERBOSITY=DEBUG
 ENV GRPC_GO_LOG_VERBOSITY_LEVEL=99
 ENV GRPC_GO_LOG_SEVERITY_LEVEL=info
 WORKDIR /root
-COPY --from=builder /polluxapp/src/c++/polluxapp ./
+COPY --from=builder /pollux-payload/src/c++/example/pollux-payload-example ./polluxapp
 EXPOSE 22 
 #For Pollux Communication
 EXPOSE 50000
