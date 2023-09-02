@@ -7,7 +7,7 @@ namespace {
 
 class PolluxPayloadExample: public PolluxPayload {
   public:
-    PolluxPayloadExample() = default;
+    PolluxPayloadExample(): PolluxPayload("polllux-payload-example") {}
 
     void loop(ZebulonPayloadClient* client) override {
       spdlog::info("Main loop started iteration: {} synchronized: {}", iteration_, isSynchronized());

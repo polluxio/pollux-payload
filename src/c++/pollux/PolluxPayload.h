@@ -7,12 +7,15 @@
 
 class PolluxPayload {
   public:
-    PolluxPayload()=default;
+    PolluxPayload(const std::string& name): name_(name) {}
+    PolluxPayload()=delete;
     PolluxPayload(const PolluxPayload&)=delete;
 
     enum UserOptionType { LONG, STRING };
     using UserOptionValue = std::variant<long, std::string>;
     using UserOptions = std::map<std::string, UserOptionValue>;
+
+    std::string getName() const { return name_; }
 
     void setLocalID(int localID) { localID_ = localID; }
     int getLocalID() const { return localID_; }
@@ -31,6 +34,7 @@ class PolluxPayload {
     void setControl(const pollux::PolluxControl& control);
 
   private:
+    std::string             name_         {};
     int                     localID_      {-1};
     std::vector<int>        otherIDs_     {};
     pollux::PolluxControl   control_      {};

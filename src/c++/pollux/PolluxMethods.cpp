@@ -119,7 +119,7 @@ int Pollux::Main(int argc, char** argv, PolluxPayload* polluxPayload) {
     zebulonIP = *zebulonIPOption;
   }
 
-  std::string logFileName("pollux-app-" + std::to_string(id) + ".log");
+  std::string logFileName(polluxPayload->getName() + "-" + std::to_string(id) + ".log");
   auto myLogger = spdlog::basic_logger_mt("pollux_logger", logFileName.c_str());
   spdlog::flush_on(spdlog::level::info);
   spdlog::set_default_logger(myLogger);
