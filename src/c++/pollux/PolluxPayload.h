@@ -28,10 +28,12 @@ class PolluxPayload {
 
     bool isSynchronized() const { return control_.synchronized(); } 
 
-    //Implemented by final user
+    void setControl(const pollux::PolluxControl& control);
+
+    //Following methods are accesible and implemented by final user
+    virtual void init() {}
     virtual void loop(ZebulonPayloadClient* client) =0;
 
-    void setControl(const pollux::PolluxControl& control);
 
   private:
     std::string             name_         {};

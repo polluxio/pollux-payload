@@ -9,6 +9,16 @@ class PolluxPayloadExample: public PolluxPayload {
   public:
     PolluxPayloadExample(): PolluxPayload("polllux-payload-example") {}
 
+    void init() override {
+      auto maxIterationsOption = getUserOptionValue("nb_iterations");
+      if (maxIterationsOption) {
+        if (not (maxIterationsOption->index() == UserOptionType::LONG)) {
+          throw PolluxPayloadException("wrong nb_iterations option type");
+        }
+        maxIterations_ = std::get<UserOptionType::LONG>(*maxIterationsOption);
+      }
+    }
+
     void loop(ZebulonPayloadClient* client) override {
       spdlog::info("Main loop started iteration: {} synchronized: {}", iteration_, isSynchronized());
       int nbMessages = 0;
@@ -18,10 +28,8 @@ class PolluxPayloadExample: public PolluxPayload {
         std::this_thread::sleep_for(5000ms);
         int pick = rand() % getOtherIDs().size();
         int id = getOtherIDs()[pick];
-        if (reporting_) {
-          spdlog::info("Reporting {}", nbMessages);
-          client->polluxReport(id, "key", "value");
-        }
+        spdlog::info("Reporting {}", nbMessages);
+        client->polluxReport(id, "key", "value");
         spdlog::info("Message {}", nbMessages++);
         client->polluxCommunication(id, "key", "value");
         if (isSynchronized() and nbMessages > 4) {
@@ -29,7 +37,7 @@ class PolluxPayloadExample: public PolluxPayload {
         }
       }
       if (isSynchronized()) {
-        if (iteration_ > 5) {
+        if (iteration_ > maxIterations_) {
           client->sendPayloadLoopEnd(iteration_++);
         } else {
           client->sendPayloadLoopReadyForNextIteration(iteration_++);
@@ -38,8 +46,8 @@ class PolluxPayloadExample: public PolluxPayload {
     }
 
   private:
-    bool                    reporting_ = true;
-    int                     iteration_ = 0;
+    int                     iteration_      {0};
+    int                     maxIterations_  {5};
 };
 
 }
