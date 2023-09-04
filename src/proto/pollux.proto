@@ -28,7 +28,8 @@ message PolluxControl {
 message PolluxMessageValue {
   oneof value {
     string strValue = 1;
-    uint64 uint64Value = 2;
+    int64 int64Value = 2;
+    uint64 uint64Value = 3;
   }
 }
 
