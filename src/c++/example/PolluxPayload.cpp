@@ -46,6 +46,23 @@ class PolluxPayloadExample: public PolluxPayload {
       }
     }
 
+    void polluxCommunication(const pollux::PolluxMapMessage* message) override {
+      std::ostringstream logMessage;
+      logMessage << "Pollux Message received: "
+        << "origin=" << message->origin();
+      for (auto& [key, value]: message->map()) {
+        logMessage << ", key=" << key;
+        switch (value.value_case()) {
+          case pollux::PolluxMessageValue::kStrValue:
+            logMessage << ", value=" << value.strvalue() << std::endl;
+            break;
+          default:
+            break;
+        }
+      }
+      spdlog::info("{}", logMessage.str());
+    }
+    
   private:
     int                     iteration_      {1};
     int                     maxIterations_  {5};
