@@ -39,7 +39,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       pollux::PolluxStandardResponse* response) override {
       spdlog::info("Start payload received");
       polluxPayLoad_->setControl(message->control());
-      polluxPayLoad->init();
+      polluxPayLoad_->init();
       std::thread mainLoopThread(&PolluxPayload::loop, polluxPayLoad_, zebulonClient_);
       mainLoopThread.detach();
       response->set_info("Payload has been started");

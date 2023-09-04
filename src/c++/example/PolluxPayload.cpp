@@ -17,6 +17,7 @@ class PolluxPayloadExample: public PolluxPayload {
         }
         maxIterations_ = std::get<UserOptionType::LONG>(*maxIterationsOption);
       }
+      spdlog::info("Number of iterations: {}", maxIterations_);
     }
 
     void loop(ZebulonPayloadClient* client) override {
@@ -46,7 +47,7 @@ class PolluxPayloadExample: public PolluxPayload {
     }
 
   private:
-    int                     iteration_      {0};
+    int                     iteration_      {1};
     int                     maxIterations_  {5};
 };
 
