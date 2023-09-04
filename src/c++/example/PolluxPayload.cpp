@@ -1,3 +1,4 @@
+#include <sstream>
 #include <thread>
 #include "spdlog/spdlog.h"
 
