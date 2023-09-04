@@ -61,6 +61,9 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       grpc::ServerContext* context,
       const pollux::PolluxMapMessage* message,
       pollux::PolluxMessageResponse* response) override {
+      polluxPayLoad_->polluxCommunication(message);
+
+      #if 0
       std::ostringstream logMessage;
       logMessage << "Pollux Message received: "
         << "origin=" << message->origin();
@@ -75,7 +78,8 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
         }
       }
       spdlog::info("{}", logMessage.str());
-      response->set_info(logMessage.str() + " understood");
+      #endif
+      response->set_info("PolluxCommunication understood");
       return grpc::Status::OK;
     }
     void setServer(grpc::Server* server) {

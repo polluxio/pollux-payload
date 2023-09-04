@@ -30,10 +30,10 @@ class PolluxPayload {
 
     void setControl(const pollux::PolluxControl& control);
 
-    //Following methods are accesible and implemented by final user
+    //Following methods are accesible and can be overrided by final user
     virtual void init() {}
-    virtual void loop(ZebulonPayloadClient* client) =0;
-
+    virtual void loop(ZebulonPayloadClient* client) {}
+    virtual void polluxCommunication(const pollux::PolluxMapMessage* message) {}
 
   private:
     std::string             name_         {};
