@@ -8,23 +8,25 @@ import datetime
 import subprocess
 import re
 
-def create_pollux_configuration(path, nb_parts, mode) -> None:
-    if mode == 'local':
+def create_pollux_configuration(path, args, nb_parts) -> None:
+    if args.mode == 'local':
         executor = 'local'
-    if mode == 'qarnot':
+    elif args.mode == 'qarnot':
         executor = 'qarnot-cluster'
-    elif mode == 'local_docker':
+    elif args.mode == 'local_docker':
         executor = 'docker'
       
     f = open(path, "w")
     f.write('synchronized: true\n')
     f.write('executor: ' + executor + '\n')
-    if mode == 'local_docker':
+    if args.mode == 'local':
+        f.write('payload: ' + args.payload + '\n')
+    elif args.mode == 'local_docker':
         f.write('payload: christophealex/polluxapp' + '\n')
     f.write('port: 50000' + '\n')
     f.write('payloads_nb: ' + str(nb_parts) + '\n')
     f.write('env_variables_to_collect:\n')
-    if mode == 'qarnot':
+    if args.mode == 'qarnot':
         f.write('  - QARNOT_COMPUTE_API_URL\n')
         f.write('  - QARNOT_STORAGE_API_URL\n')
     f.write('  - GRPC_TRACE\n')
@@ -48,7 +50,7 @@ def create_pollux_yaml(args, pollux_path) -> int:
             #error
             return -1
     else:
-        create_pollux_configuration(pollux_path, args.nb_parts, args.mode)
+        create_pollux_configuration(pollux_path, args, args.nb_parts)
         return args.nb_parts
 
 def clean_containers(client):
@@ -82,7 +84,7 @@ def run_local_mode(args) -> int:
     pollux_bin = os.path.expandvars(pollux_path)
 
     #call pollux locally
-    subprocess.run('pollux', check=True)
+    subprocess.run(pollux_bin, check=True)
 
 def run_local_docker_mode(args) -> int:
     pollux_path = 'pollux.yaml'
