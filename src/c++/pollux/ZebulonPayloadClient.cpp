@@ -10,10 +10,6 @@ void polluxCommunication(
   pollux::ZebulonPayload::Stub* stub,
   const std::string& key,
   pollux::PolluxMapMessage& message) {
-  if (destinations.empty()) {
-    //report error ?
-    return; 
-  }
   message.set_origin(origin);
   for (auto destination: destinations) {
     message.add_destinations(destination);
@@ -92,6 +88,10 @@ void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, c
   polluxCommunication(Destinations({id}), key, value);
 }
 
+void ZebulonPayloadClient::polluxCommunication(const std::string& key, const std::string& value) {
+  polluxCommunication(Destinations(), key, value);
+}
+
 void ZebulonPayloadClient::polluxCommunication(const Destinations& destinations, const std::string& key, int64_t value) {
   pollux::PolluxMapMessage message;
   pollux::PolluxMessageValue messageValue;
@@ -104,6 +104,10 @@ void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, i
   polluxCommunication(Destinations({id}), key, value);
 }
 
+void ZebulonPayloadClient::polluxCommunication(const std::string& key, int64_t value) {
+  polluxCommunication(Destinations(), key, value);
+}
+
 void ZebulonPayloadClient::polluxCommunication(const Destinations& destinations, const std::string& key, uint64_t value) {
   pollux::PolluxMapMessage message;
   pollux::PolluxMessageValue messageValue;
@@ -114,6 +118,10 @@ void ZebulonPayloadClient::polluxCommunication(const Destinations& destinations,
 
 void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, uint64_t value) {
   polluxCommunication(Destinations({id}), key, value);
+}
+
+void ZebulonPayloadClient::polluxCommunication(const std::string& key, uint64_t value) {
+  polluxCommunication(Destinations(), key, value);
 }
 
 void ZebulonPayloadClient::polluxReport(int id, const std::string& key, const std::string& value) {
