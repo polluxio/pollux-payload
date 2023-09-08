@@ -89,6 +89,13 @@ class PolluxPayloadExample: public PolluxPayload {
           case pollux::PolluxMessageValue::kUint64Value:
             logMessage << ", value=" << value.uint64value() << std::endl;
             break;
+          case pollux::PolluxMessageValue::kInt64ArrayValue:
+            logMessage << ", value=";
+            for (auto v: value.int64arrayvalue().values()) {
+              logMessage << v << ", ";
+            }
+            logMessage << std::endl;
+            break;
           case pollux::PolluxMessageValue::kInt64Value:
             logMessage << ", value=" << value.int64value() << std::endl;
             break;

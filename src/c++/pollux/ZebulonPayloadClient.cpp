@@ -127,10 +127,10 @@ void ZebulonPayloadClient::polluxCommunication(const std::string& key, uint64_t 
 void ZebulonPayloadClient::polluxCommunication(const Destinations& destinations, const std::string& key, const Int64Array& values) {
   pollux::PolluxMapMessage message;
   pollux::PolluxMessageValue messageValue;
-  //for (auto value: values) {
-  //  messageValue.set
-  //}
-  //messageValue.set_uint64value(value);
+  auto int64Array = messageValue.mutable_int64arrayvalue();
+  for (auto value: values) {
+    int64Array->add_values(value);
+  }
   (*message.mutable_map())[key] = messageValue;
   ::polluxCommunication(destinations, id_, stub_.get(), key, message);
 }
