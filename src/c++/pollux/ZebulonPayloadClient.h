@@ -13,7 +13,18 @@ class ZebulonPayloadClient {
     void sendPayloadReady(uint16_t port);
     void sendPayloadLoopReadyForNextIteration(int iteration);
     void sendPayloadLoopEnd(int iteration);
-    void polluxCommunication(int id, const std::string& key, const std::string& value);
+    
+    //send communication to outside world
+    using Destinations = std::vector<int>;
+    void polluxCommunication(const Destinations& destinations, const std::string& key, const std::string& value);
+    void polluxCommunication(int destination, const std::string& key, const std::string& value);
+
+    void polluxCommunication(const Destinations& destinations, const std::string& key, uint64_t value);
+    void polluxCommunication(int destination, const std::string& key, uint64_t value);
+
+    void polluxCommunication(const Destinations& destinations, const std::string& key, int64_t value);
+    void polluxCommunication(int destination, const std::string& key, int64_t value);
+
     void polluxReport(int id, const std::string& key, const std::string& value);
     std::string getString() const;
 

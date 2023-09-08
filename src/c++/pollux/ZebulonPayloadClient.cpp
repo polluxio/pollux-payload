@@ -2,6 +2,34 @@
 
 #include "spdlog/spdlog.h"
 
+namespace {
+
+void polluxCommunication(
+  const ZebulonPayloadClient::Destinations& destinations,
+  int origin,
+  pollux::ZebulonPayload::Stub* stub,
+  const std::string& key,
+  pollux::PolluxMapMessage& message) {
+  if (destinations.empty()) {
+    //report error ?
+    return; 
+  }
+  message.set_origin(origin);
+  for (auto destination: destinations) {
+    message.add_destinations(destination);
+  }
+  grpc::ClientContext context;
+  pollux::PolluxMessageResponse response;
+  grpc::Status status = stub->PolluxCommunication(&context, message, &response);
+  if (not status.ok()) {
+    spdlog::error("Error while sending \"polluxCommunication\": {}", status.error_message());
+    exit(-54);
+  }
+  spdlog::info("PolluxCommunication::Response: {}", response.info());
+}
+
+}
+
 ZebulonPayloadClient::ZebulonPayloadClient(std::shared_ptr<grpc::Channel> channel, int id):
   stub_(pollux::ZebulonPayload::NewStub(channel)),
   id_(id)
@@ -52,22 +80,40 @@ void ZebulonPayloadClient::sendPayloadLoopEnd(int iteration) {
   spdlog::info("Response from Zebulon to PayloadEnd: ", response.info());
 }
 
-void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, const std::string& value) {
-  grpc::ClientContext context;
+void ZebulonPayloadClient::polluxCommunication(const Destinations& destinations, const std::string& key, const std::string& value) {
   pollux::PolluxMapMessage message;
-  message.set_origin(id_);
-  message.add_destinations(id);
   pollux::PolluxMessageValue messageValue;
   messageValue.set_strvalue(value);
   (*message.mutable_map())[key] = messageValue;
+  ::polluxCommunication(destinations, id_, stub_.get(), key, message);
+}
 
-  pollux::PolluxMessageResponse response;
-  grpc::Status status = stub_->PolluxCommunication(&context, message, &response);
-  if (not status.ok()) {
-    spdlog::error("Error while sending \"polluxCommunication\": {}", status.error_message());
-    exit(-54);
-  }
-  spdlog::info("PolluxCommunication::Response: {}", response.info());
+void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, const std::string& value) {
+  polluxCommunication(Destinations({id}), key, value);
+}
+
+void ZebulonPayloadClient::polluxCommunication(const Destinations& destinations, const std::string& key, int64_t value) {
+  pollux::PolluxMapMessage message;
+  pollux::PolluxMessageValue messageValue;
+  messageValue.set_int64value(value);
+  (*message.mutable_map())[key] = messageValue;
+  ::polluxCommunication(destinations, id_, stub_.get(), key, message);
+}
+
+void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, int64_t value) {
+  polluxCommunication(Destinations({id}), key, value);
+}
+
+void ZebulonPayloadClient::polluxCommunication(const Destinations& destinations, const std::string& key, uint64_t value) {
+  pollux::PolluxMapMessage message;
+  pollux::PolluxMessageValue messageValue;
+  messageValue.set_uint64value(value);
+  (*message.mutable_map())[key] = messageValue;
+  ::polluxCommunication(destinations, id_, stub_.get(), key, message);
+}
+
+void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, uint64_t value) {
+  polluxCommunication(Destinations({id}), key, value);
 }
 
 void ZebulonPayloadClient::polluxReport(int id, const std::string& key, const std::string& value) {

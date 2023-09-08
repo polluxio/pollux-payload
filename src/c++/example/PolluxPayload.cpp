@@ -8,7 +8,7 @@ namespace {
 
 class PolluxPayloadExample: public PolluxPayload {
   public:
-    PolluxPayloadExample(): PolluxPayload("polllux-payload-example") {}
+    PolluxPayloadExample(): PolluxPayload("pollux-payload-example") {}
 
     void init() override {
       auto maxIterationsOption = getUserOptionValue("nb_iterations");
@@ -30,10 +30,33 @@ class PolluxPayloadExample: public PolluxPayload {
         std::this_thread::sleep_for(5000ms);
         int pick = rand() % getOtherIDs().size();
         int id = getOtherIDs()[pick];
+
         spdlog::info("Reporting {}", nbMessages);
         client->polluxReport(id, "key", "value");
+
+        int messageType = rand() % 3;
+        switch(messageType) {
+          case 0:
+            {
+              //random int
+              int value = rand()%std::numeric_limits<int>::max();
+              client->polluxCommunication(id, "key", (int64_t)value);
+              break;
+            }
+          case 1:
+            {
+              //random uint
+              int value = rand()%std::numeric_limits<int>::max();
+              client->polluxCommunication(id, "key", (uint64_t)value);
+              break;
+            }
+          default:
+            client->polluxCommunication(id, "key", "value");
+            break;
+
+        }
+
         spdlog::info("Message {}", nbMessages++);
-        client->polluxCommunication(id, "key", "value");
         if (isSynchronized() and nbMessages > 4) {
           break;
         }
@@ -56,6 +79,12 @@ class PolluxPayloadExample: public PolluxPayload {
         switch (value.value_case()) {
           case pollux::PolluxMessageValue::kStrValue:
             logMessage << ", value=" << value.strvalue() << std::endl;
+            break;
+          case pollux::PolluxMessageValue::kUint64Value:
+            logMessage << ", value=" << value.uint64value() << std::endl;
+            break;
+          case pollux::PolluxMessageValue::kInt64Value:
+            logMessage << ", value=" << value.int64value() << std::endl;
             break;
           default:
             break;
