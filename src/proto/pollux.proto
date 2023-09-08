@@ -25,17 +25,22 @@ message PolluxControl {
   map<string, PolluxUserOptionValue> userOptions = 3; 
 }
 
+message PolluxMessageInt64ArrayValue {
+  repeated int64 values = 1 [packed=true];
+}
+
 message PolluxMessageValue {
   oneof value {
     string strValue = 1;
     int64 int64Value = 2;
-    uint64 uint64Value = 3;
+    PolluxMessageInt64ArrayValue int64ArrayValue = 3;
+    uint64 uint64Value = 4;
   }
 }
 
 message PolluxMapMessage {
   uint32 origin  = 1;
-  repeated uint32 destinations = 2;
+  repeated uint32 destinations = 2 [packed=true];
   map<string, PolluxMessageValue> map = 3; 
 }
 

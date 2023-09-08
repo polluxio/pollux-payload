@@ -124,6 +124,25 @@ void ZebulonPayloadClient::polluxCommunication(const std::string& key, uint64_t 
   polluxCommunication(Destinations(), key, value);
 }
 
+void ZebulonPayloadClient::polluxCommunication(const Destinations& destinations, const std::string& key, const Int64Array& values) {
+  pollux::PolluxMapMessage message;
+  pollux::PolluxMessageValue messageValue;
+  //for (auto value: values) {
+  //  messageValue.set
+  //}
+  //messageValue.set_uint64value(value);
+  (*message.mutable_map())[key] = messageValue;
+  ::polluxCommunication(destinations, id_, stub_.get(), key, message);
+}
+
+void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, const Int64Array& values) {
+  polluxCommunication(Destinations({id}), key, values);
+}
+
+//void ZebulonPayloadClient::polluxCommunication(const std::string& key, uint64_t value) {
+//  polluxCommunication(Destinations(), key, value);
+//}
+
 void ZebulonPayloadClient::polluxReport(int id, const std::string& key, const std::string& value) {
   grpc::ClientContext context;
   pollux::PolluxReportMessage message;

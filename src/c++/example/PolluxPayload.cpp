@@ -34,7 +34,7 @@ class PolluxPayloadExample: public PolluxPayload {
         spdlog::info("Reporting {}", nbMessages);
         client->polluxReport(id, "key", "value");
 
-        int messageType = rand() % 3;
+        int messageType = rand() % 4;
         switch(messageType) {
           case 0:
             {
@@ -48,6 +48,12 @@ class PolluxPayloadExample: public PolluxPayload {
               //random uint
               int value = rand()%std::numeric_limits<int>::max();
               client->polluxCommunication(id, "key", (uint64_t)value);
+              break;
+            }
+          case 2:
+            {
+              //int array
+              client->polluxCommunication(id, "key", ZebulonPayloadClient::Int64Array({0, 10, 200, 3000, 40000, 500000}));
               break;
             }
           default:

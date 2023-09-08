@@ -28,6 +28,11 @@ class ZebulonPayloadClient {
     void polluxCommunication(int destination, const std::string& key, int64_t value);
     void polluxCommunication(const std::string& key, int64_t value);
 
+    using Int64Array = std::vector<int64_t>;
+    void polluxCommunication(const Destinations& destinations, const std::string& key, const Int64Array& values);
+    void polluxCommunication(int destination, const std::string& key, const Int64Array& values);
+    void polluxCommunication(const std::string& key, const Int64Array& values);
+
     void polluxReport(int id, const std::string& key, const std::string& value);
     std::string getString() const;
 
