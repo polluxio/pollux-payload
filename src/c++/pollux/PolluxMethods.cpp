@@ -90,8 +90,9 @@ int Pollux::Main(int argc, char** argv, PolluxPayload* polluxPayload) {
     .required()
     .help("local id");
   program.add_argument("-v", "--verbose_level")
+    .required()
     .help("verbose level: info(default)/debug/trace")
-    .default_value("info");
+    .default_value(std::string("debug"));
   program.add_argument("-t", "--zebulon_ip")
     .help("impose zebulon ip");
 
@@ -112,7 +113,7 @@ int Pollux::Main(int argc, char** argv, PolluxPayload* polluxPayload) {
 
   std::string logFileName(polluxPayload->getName() + "-" + std::to_string(id) + ".log");
   auto myLogger = spdlog::basic_logger_mt("pollux_logger", logFileName.c_str());
-  std::string verboseLevel = *(program.present("--verbose_level"));
+  std::string verboseLevel = program.get<std::string>("--verbose_level");
   if (verboseLevel == "debug") {
     spdlog::set_level(spdlog::level::debug);
   } else if (verboseLevel == "trace") {
