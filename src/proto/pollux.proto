@@ -21,8 +21,9 @@ message PolluxUserOptionValue {
 
 message PolluxControl {
   repeated uint32 partIDs = 1;
-  bool synchronized = 2;
-  map<string, PolluxUserOptionValue> userOptions = 3; 
+  uint32 transmissionTimeout = 2;
+  bool synchronized = 3;
+  map<string, PolluxUserOptionValue> userOptions = 4; 
 }
 
 message PolluxMessageInt64ArrayValue {
