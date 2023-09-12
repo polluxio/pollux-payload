@@ -21,7 +21,7 @@ void polluxCommunication(
     spdlog::error("Error while sending \"polluxCommunication\": {}", status.error_message());
     exit(-54);
   }
-  spdlog::info("PolluxCommunication::Response: {}", response.info());
+  spdlog::debug("PolluxCommunication::Response: {}", response.info());
 }
 
 }
@@ -45,7 +45,7 @@ void ZebulonPayloadClient::sendPayloadReady(uint16_t port) {
     spdlog::error("Error while sending \"sendPayloadReady\": {}", status.error_message());
     exit(-54);
   }
-  spdlog::info("Response from Zebulon to PayloadReady: {}", response.info());
+  spdlog::debug("Response from Zebulon to PayloadReady: {}", response.info());
 }
 
 void ZebulonPayloadClient::sendPayloadLoopReadyForNextIteration(int iteration) {
@@ -59,7 +59,7 @@ void ZebulonPayloadClient::sendPayloadLoopReadyForNextIteration(int iteration) {
     spdlog::error("Error while sending \"sendPayloadLoopReadyForNextIteration\": {}", status.error_message());
     exit(-54);
   }
-  spdlog::info("Response from Zebulon to PayloadLoopReadyForNextIteration: {}", response.info());
+  spdlog::debug("Response from Zebulon to PayloadLoopReadyForNextIteration: {}", response.info());
 }
 
 void ZebulonPayloadClient::sendPayloadLoopEnd(int iteration) {
@@ -73,7 +73,7 @@ void ZebulonPayloadClient::sendPayloadLoopEnd(int iteration) {
     spdlog::error("Error while sending \"sendPayloadLoopEnd\": {}", status.error_message());
     exit(-54);
   }
-  spdlog::info("Response from Zebulon to PayloadEnd: ", response.info());
+  spdlog::debug("Response from Zebulon to PayloadEnd: ", response.info());
 }
 
 void ZebulonPayloadClient::polluxCommunication(const Destinations& destinations, const std::string& key, const std::string& value) {
@@ -155,7 +155,7 @@ void ZebulonPayloadClient::polluxReport(int id, const std::string& key, const st
     spdlog::error("Error while sending \"polluxReport\": {}", status.error_message());
     exit(-54);
   }
-  spdlog::info("PolluxCommunication::Report: {}", response.info());
+  spdlog::debug("PolluxCommunication::Report: {}", response.info());
 }
 
 std::string ZebulonPayloadClient::getString() const {
