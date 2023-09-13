@@ -19,7 +19,9 @@ class PolluxPayload {
 
     void setLocalID(int localID) { localID_ = localID; }
     int getLocalID() const { return localID_; }
+
     std::vector<int> getOtherIDs() const { return otherIDs_; }
+    size_t getNumberOfPayloads() const { return otherIDs_.size()+1; }
 
     UserOptions getUserOptions() const { return userOptions_; }
     //returns nullptr if does not exist
