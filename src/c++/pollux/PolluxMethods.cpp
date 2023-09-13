@@ -89,10 +89,10 @@ int Pollux::Main(int argc, char** argv, PolluxPayload* polluxPayload) {
     .scan<'d', int>()
     .required()
     .help("local id");
-  program.add_argument("-v", "--verbose_level")
+  program.add_argument("-v", "--verbosity")
     .required()
-    .help("verbose level: info(default)/debug/trace")
-    .default_value(std::string("debug"));
+    .help("verbosity: info/debug/trace (default:info)")
+    .default_value(std::string("info"));
   program.add_argument("-t", "--zebulon_ip")
     .help("impose zebulon ip");
 
@@ -113,14 +113,14 @@ int Pollux::Main(int argc, char** argv, PolluxPayload* polluxPayload) {
 
   std::string logFileName(polluxPayload->getName() + "-" + std::to_string(id) + ".log");
   auto myLogger = spdlog::basic_logger_mt("pollux_logger", logFileName.c_str());
-  std::string verboseLevel = program.get<std::string>("--verbose_level");
-  if (verboseLevel == "debug") {
+  std::string verbosity = program.get<std::string>("--verbosity");
+  if (verbosity == "debug") {
     spdlog::set_level(spdlog::level::debug);
-  } else if (verboseLevel == "trace") {
+  } else if (verbosity == "trace") {
     spdlog::set_level(spdlog::level::trace);
   } else {
-    if (verboseLevel != "info") {
-      spdlog::warn("unrecognized verbose level: {}, forcing to \"info\"", verboseLevel);
+    if (verbosity != "info") {
+      spdlog::warn("unrecognized verbose level: {}, forcing to \"info\"", verbosity);
     }
     spdlog::set_level(spdlog::level::info);
   }
