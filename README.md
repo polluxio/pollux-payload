@@ -11,7 +11,8 @@ Contains Pollux Payload libraries and Examples.
 git submodule update --init --recursive
 ```
 
-
+## Launcher
+https://qarnot.com/documentation/sdk-python/installation.html
 
 
 

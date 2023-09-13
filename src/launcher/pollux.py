@@ -6,7 +6,7 @@ import sys
 import argparse
 import datetime
 import subprocess
-import re
+import yaml
 
 def create_pollux_configuration(path, args, nb_parts) -> None:
     if args.mode == 'local':
@@ -35,7 +35,13 @@ def create_pollux_configuration(path, args, nb_parts) -> None:
     f.write('  - GRPC_GO_LOG_SEVERITY_LEVEL\n')
 
 def readparts_from_yaml(file) -> int:
-    return 0
+    with open(file, 'r') as configFile:
+        content = yaml.safe_load(configFile) 
+        try:
+            print(content)
+            return content["payloads_nb"]
+        except:
+            print("Unknown field")
 
 def create_pollux_yaml(args, pollux_path) -> int:
     if os.path.exists(pollux_path):

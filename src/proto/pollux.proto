@@ -20,10 +20,16 @@ message PolluxUserOptionValue {
 }
 
 message PolluxControl {
-  repeated uint32 partIDs = 1;
-  uint32 transmissionTimeout = 2;
-  bool synchronized = 3;
-  map<string, PolluxUserOptionValue> userOptions = 4; 
+  enum VerbosityLevel {
+    INFO = 0;
+    DEBUG = 1;
+    TRACE = 2;
+  }
+  VerbosityLevel verbosity = 1;
+  repeated uint32 partIDs = 2;
+  uint32 transmissionTimeout = 3;
+  bool synchronized = 4;
+  map<string, PolluxUserOptionValue> userOptions = 5; 
 }
 
 message PolluxMessageInt64ArrayValue {
