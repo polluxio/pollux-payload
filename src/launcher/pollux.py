@@ -108,7 +108,7 @@ def run_local_docker_mode(args) -> int:
     #create network
     client.networks.create("pollux", driver="bridge")
     #create master pollux
-    image = "christophealex/" + args.payload
+    image = args.payload
     image += ":latest"
     pollux_configuration_path = os.path.abspath('pollux.yaml')
     pollux_volume_bind = {pollux_configuration_path: {'bind': '/pollux/pollux.yaml', 'mode': 'ro'}}
