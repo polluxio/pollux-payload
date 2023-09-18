@@ -171,9 +171,7 @@ def run_qarnot_mode(args) -> int:
     input_bucket = conn.create_bucket(args.input_bucket)
 
 
-    input_bucket.add_file(os.path.join(pollux_path, 'pollux.yaml'), remote='pollux.yaml')
-    for part in range(nb_parts):
-      input_bucket.add_directory(os.path.join(pollux_path, 'part' + str(part+1)), remote='part' + str(part+1))
+    input_bucket.add_file('pollux.yaml', remote='pollux.yaml')
     #Attach the bucket to the task
     task.resources.append(input_bucket)
 
