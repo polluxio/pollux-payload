@@ -10,7 +10,7 @@ COPY cmake cmake
 COPY src src
 COPY thirdparty thirdparty
 COPY CMakeLists.txt .
-RUN cmake . && make -j$(nproc)
+RUN cmake . && make VERBOSE=ON -j$(nproc)
 
 FROM pollux-alpine:latest AS polluxapp
 RUN apk add --no-cache grpc-dev openssh-server
