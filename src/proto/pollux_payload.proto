@@ -9,8 +9,8 @@ import "pollux.proto";
 //Pollux server from Payload side
 service PolluxPayload {
   rpc PolluxCommunication(PolluxMapMessage) returns (PolluxMessageResponse) {}
-  rpc Start(PayloadStartMessage) returns (PolluxStandardResponse) {}
-  rpc Iterate(PayloadIterateMessage) returns (PolluxStandardResponse) {}
+  rpc Start(PayloadStartMessage) returns (PolluxControlResponse) {}
+  rpc Iterate(PayloadIterateMessage) returns (PolluxControlResponse) {}
   rpc Terminate(PayloadTerminateMessage) returns (EmptyResponse) {}
 }
 
@@ -20,7 +20,6 @@ service ZebulonPayload {
   rpc PayloadLoopReadyForNextIteration(PayloadLoopMessage) returns (PolluxStandardResponse) {}
   rpc PayloadLoopEnd(PayloadLoopMessage) returns (PolluxStandardResponse) {}
   rpc PayloadInactive(PayloadInactiveMessage) returns (PolluxStandardResponse) {}
-  rpc PayloadFailure(PayloadFailureMessage) returns (PolluxStandardResponse) {}
   rpc PolluxCommunication(PolluxMapMessage) returns (PolluxMessageResponse) {}
   rpc PolluxReport(PolluxReportMessage) returns (PolluxStandardResponse) {}
 }
@@ -29,10 +28,6 @@ message PayloadReadyMessage {
   string info = 1;
   uint32 port = 2;
   pollux.PolluxVersion version = 3;
-}
-
-message PayloadFailureMessage {
-  string error = 1;
 }
 
 message PayloadLoopMessage {

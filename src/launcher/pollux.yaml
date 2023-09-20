@@ -1,0 +1,10 @@
+synchronized: true
+executor: local
+payload: polluxapp
+port: 50000
+payloads_nb: 2
+env_variables_to_collect:
+  - GRPC_TRACE
+  - GRPC_VERBOSITY
+  - GRPC_GO_LOG_VERBOSITY_LEVEL
+  - GRPC_GO_LOG_SEVERITY_LEVEL

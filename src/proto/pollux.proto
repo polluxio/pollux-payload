@@ -60,6 +60,11 @@ message PolluxMessageResponse {
   string info = 1;
 }
 
+message PolluxControlResponse {
+  string info = 1;
+  string error = 2;
+}
+
 message PolluxStandardResponse {
   string info = 1;
 }

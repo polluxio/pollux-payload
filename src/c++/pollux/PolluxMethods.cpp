@@ -35,12 +35,17 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
     grpc::Status Start(
       grpc::ServerContext* context,
       const pollux::PayloadStartMessage* message, 
-      pollux::PolluxStandardResponse* response) override {
+      pollux::PolluxControlResponse* response) override {
       spdlog::info("Start payload received");
-      polluxPayLoad_->setControl(message->control());
-      polluxPayLoad_->init();
-      std::thread mainLoopThread(&PolluxPayload::loop, polluxPayLoad_, zebulonClient_);
-      mainLoopThread.detach();
+      try {
+        polluxPayLoad_->setControl(message->control());
+        polluxPayLoad_->init();
+        std::thread mainLoopThread(&PolluxPayload::loop, polluxPayLoad_, zebulonClient_);
+        mainLoopThread.detach();
+      } catch (const PolluxPayloadException& e) {
+        response->set_error(e.getReason());
+        return grpc::Status::OK;
+      }
       response->set_info("Payload has been started");
       return grpc::Status::OK;
     }
@@ -48,10 +53,15 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
     grpc::Status Iterate(
       grpc::ServerContext* context,
       const pollux::PayloadIterateMessage* message, 
-      pollux::PolluxStandardResponse* response) override {
+      pollux::PolluxControlResponse* response) override {
       spdlog::info("Iterate payload received, iteration: {}", message->iteration());
-      std::thread mainLoopThread(&PolluxPayload::loop, polluxPayLoad_, zebulonClient_);
-      mainLoopThread.detach();
+      try {
+        std::thread mainLoopThread(&PolluxPayload::loop, polluxPayLoad_, zebulonClient_);
+        mainLoopThread.detach();
+      } catch (const PolluxPayloadException& e) {
+        response->set_error(e.getReason());
+        return grpc::Status::OK;
+      }
       response->set_info("Payload next iteration");
       return grpc::Status::OK;
     }

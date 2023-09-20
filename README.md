@@ -3,13 +3,19 @@
 </div>
 
 
-# pollux-payload
+# Pollux
 ## Introduction
+
 Contains Pollux Payload libraries and Examples.
 ## Pollux installation
 ```bash
 git submodule update --init --recursive
 ```
+
+## Supported languages
+### C++
+
+### Python
 
 ## Launcher
 https://qarnot.com/documentation/sdk-python/installation.html
