@@ -5,7 +5,6 @@ RUN apt-get update && apt-get -y install \
     cmake \
     make  \
     g++ \
-    libboost-dev \
     protobuf-compiler-grpc \
     libgrpc++-dev
 

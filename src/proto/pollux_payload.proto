@@ -20,6 +20,7 @@ service ZebulonPayload {
   rpc PayloadLoopReadyForNextIteration(PayloadLoopMessage) returns (PolluxStandardResponse) {}
   rpc PayloadLoopEnd(PayloadLoopMessage) returns (PolluxStandardResponse) {}
   rpc PayloadInactive(PayloadInactiveMessage) returns (PolluxStandardResponse) {}
+  rpc PayloadFailure(PayloadFailureMessage) returns (PolluxStandardResponse) {}
   rpc PolluxCommunication(PolluxMapMessage) returns (PolluxMessageResponse) {}
   rpc PolluxReport(PolluxReportMessage) returns (PolluxStandardResponse) {}
 }
@@ -28,6 +29,10 @@ message PayloadReadyMessage {
   string info = 1;
   uint32 port = 2;
   pollux.PolluxVersion version = 3;
+}
+
+message PayloadFailureMessage {
+  string error = 1;
 }
 
 message PayloadLoopMessage {
