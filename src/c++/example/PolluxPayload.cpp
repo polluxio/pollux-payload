@@ -32,7 +32,7 @@ class PolluxPayloadExample: public PolluxPayload {
         int id = getOtherIDs()[pick];
 
         spdlog::info("Reporting {}", nbMessages);
-        client->polluxReport(id, "key", "value");
+        client->polluxReport("key", "value");
 
         int messageType = rand() % 4;
         switch(messageType) {
