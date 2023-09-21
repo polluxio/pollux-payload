@@ -76,32 +76,30 @@ class PolluxPayloadExample: public PolluxPayload {
       }
     }
 
-    void polluxCommunication(const pollux::PolluxMapMessage* message) override {
+    void polluxCommunication(const pollux::PolluxMessage* message) override {
       std::ostringstream logMessage;
       logMessage << "Pollux Message received: "
-        << "origin=" << message->origin();
-      for (auto& [key, value]: message->map()) {
-        logMessage << ", key=" << key;
-        switch (value.value_case()) {
-          case pollux::PolluxMessageValue::kStrValue:
-            logMessage << ", value=" << value.strvalue() << std::endl;
-            break;
-          case pollux::PolluxMessageValue::kUint64Value:
-            logMessage << ", value=" << value.uint64value() << std::endl;
-            break;
-          case pollux::PolluxMessageValue::kInt64ArrayValue:
-            logMessage << ", value=";
-            for (auto v: value.int64arrayvalue().values()) {
-              logMessage << v << ", ";
-            }
-            logMessage << std::endl;
-            break;
-          case pollux::PolluxMessageValue::kInt64Value:
-            logMessage << ", value=" << value.int64value() << std::endl;
-            break;
-          default:
-            break;
-        }
+        << "origin=" << message->origin()
+        << " key=" << message->key();
+      switch (message->value_case()) {
+        case pollux::PolluxMessage::kStrValue:
+          logMessage << ", value=" << message->strvalue() << std::endl;
+          break;
+        case pollux::PolluxMessage::kUint64Value:
+          logMessage << ", value=" << message->uint64value() << std::endl;
+          break;
+        case pollux::PolluxMessage::kInt64ArrayValue:
+          logMessage << ", value=";
+          for (auto v: message->int64arrayvalue().values()) {
+            logMessage << v << ", ";
+          }
+          logMessage << std::endl;
+          break;
+        case pollux::PolluxMessage::kInt64Value:
+          logMessage << ", value=" << message->int64value() << std::endl;
+          break;
+        default:
+          break;
       }
       spdlog::info("{}", logMessage.str());
     }

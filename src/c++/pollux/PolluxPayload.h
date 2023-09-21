@@ -35,7 +35,7 @@ class PolluxPayload {
     //Following methods are accesible and can be overrided by final user
     virtual void init() {}
     virtual void loop(ZebulonPayloadClient* client) {}
-    virtual void polluxCommunication(const pollux::PolluxMapMessage* message) {}
+    virtual void polluxCommunication(const pollux::PolluxMessage* message) {}
 
   private:
     std::string             name_         {};

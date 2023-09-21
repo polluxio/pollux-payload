@@ -36,19 +36,16 @@ message PolluxMessageInt64ArrayValue {
   repeated int64 values = 1 [packed=true];
 }
 
-message PolluxMessageValue {
-  oneof value {
-    string strValue = 1;
-    int64 int64Value = 2;
-    PolluxMessageInt64ArrayValue int64ArrayValue = 3;
-    uint64 uint64Value = 4;
-  }
-}
-
-message PolluxMapMessage {
+message PolluxMessage {
   uint32 origin  = 1;
   repeated uint32 destinations = 2 [packed=true];
-  map<string, PolluxMessageValue> map = 3; 
+  string key = 3;
+  oneof value {
+    string strValue = 4;
+    int64 int64Value = 5;
+    PolluxMessageInt64ArrayValue int64ArrayValue = 6;
+    uint64 uint64Value = 7;
+  }
 }
 
 message PolluxReportMessage {

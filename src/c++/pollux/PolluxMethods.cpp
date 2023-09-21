@@ -68,7 +68,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
 
     grpc::Status PolluxCommunication(
       grpc::ServerContext* context,
-      const pollux::PolluxMapMessage* message,
+      const pollux::PolluxMessage* message,
       pollux::PolluxMessageResponse* response) override {
       spdlog::debug("Pollux Communication received from zebulon");
       polluxPayLoad_->polluxCommunication(message);
