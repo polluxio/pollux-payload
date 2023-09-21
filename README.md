@@ -3,8 +3,21 @@
 </div>
 
 
-# Pollux
 ## Introduction
+
+Currently, only C++ payload is supported. 
+
+
+https://github.com/nuvulu/pollux-payload/assets/3635601/3fa89970-34cd-44c1-8359-9802c0719ff4
+
+
+
+
+## Pollux payload 
+
+## Quick Testing
+
+
 
 Contains Pollux Payload libraries and Examples.
 ## Pollux installation
