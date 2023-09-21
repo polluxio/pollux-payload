@@ -33,7 +33,7 @@ class ZebulonPayloadClient {
     void polluxCommunication(int destination, const std::string& key, const Int64Array& values);
     void polluxCommunication(const std::string& key, const Int64Array& values);
 
-    void polluxReport(int id, const std::string& key, const std::string& value);
+    void polluxReport(const std::string& key, const std::string& value);
     std::string getString() const;
 
   private:
