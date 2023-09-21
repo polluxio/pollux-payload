@@ -8,11 +8,14 @@
 With **Pollux**, algorithms can seamlessly span the Cloud, ensuring synchronization and continuous communication among distributed components.
 **Pollux** has been designed in order to support multiple languages for Payload.
 
+https://github.com/nuvulu/pollux-payload/assets/3635601/3fa89970-34cd-44c1-8359-9802c0719ff4
+
 ## Use cases
 Currently, the following **Pollux** use cases can be found:
  - [Pollux payload example](): a simple test application deploying a configurable number of workers and showing
  - [Pollux PSO - Particle Swarm Optimization](): a [PSO](https://en.wikipedia.org/wiki/Particle_swarm_optimization) Pollux implementation.
- - [Pollux SAT](): a 
+ - [Pollux SAT]():
+
 https://github.com/nuvulu/pollux-payload/assets/3635601/3fa89970-34cd-44c1-8359-9802c0719ff4
 
 ## Building and Installing
