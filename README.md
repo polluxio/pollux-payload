@@ -4,31 +4,31 @@
 
 
 ## Introduction
+**Pollux is a Cloud orchestrator designed to distribute and manage complex algorithms, including NP-Hard and Complete problems, across multiple cloud-based machines.
+With **Pollux, algorithms can seamlessly span the Cloud, ensuring synchronization and continuous communication among distributed components.
+**Pollux has been designed in order to support multiple languages for Payload.
 
-Currently, only C++ payload is supported. 
-
-
+## Use cases
+Currently, three **Pollux use cases can be found:
+ - [Pollux payload example](): a simple test application deploying a configurable number of workers and showing
+ - [Pollux PSO - Particle Swarm Optimization](): a [PSO](https://en.wikipedia.org/wiki/Particle_swarm_optimization) Pollux implementation.
+ - [Pollux SAT](): a 
 https://github.com/nuvulu/pollux-payload/assets/3635601/3fa89970-34cd-44c1-8359-9802c0719ff4
 
-
-
-
-## Pollux payload 
-
-## Quick Testing
-
-
-
-Contains Pollux Payload libraries and Examples.
-## Pollux installation
+## Building and Installing
 ```bash
 git submodule update --init --recursive
 ```
 
-## Supported languages
-### C++
+## Runtime environment
+### Local docker
+### Local
+### Cloud
+#### Qarnot
+#### Azure
 
-### Python
+## Supported languages
+Currently, only `C++` is supported. `Python` support could be easily added (some early tests have been done).
 
 ## Launcher
 https://qarnot.com/documentation/sdk-python/installation.html
