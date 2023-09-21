@@ -15,7 +15,7 @@ COPY thirdparty thirdparty
 COPY CMakeLists.txt .
 RUN cmake . && make -j$(nproc)
 
-FROM pollux:latest AS polluxapp
+FROM christophealex/pollux:latest AS pollux-payload
 RUN apt-get update && apt-get -y install libgrpc++ openssh-server
 RUN mkdir /var/run/sshd
 RUN sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config

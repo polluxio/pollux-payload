@@ -143,7 +143,7 @@ void ZebulonPayloadClient::polluxCommunication(int id, const std::string& key, c
 //  polluxCommunication(Destinations(), key, value);
 //}
 
-void ZebulonPayloadClient::polluxReport(int id, const std::string& key, const std::string& value) {
+void ZebulonPayloadClient::polluxReport(const std::string& key, const std::string& value) {
   grpc::ClientContext context;
   pollux::PolluxReportMessage message;
   message.set_origin(id_);
