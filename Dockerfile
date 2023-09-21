@@ -25,7 +25,7 @@ ENV GRPC_VERBOSITY=DEBUG
 ENV GRPC_GO_LOG_VERBOSITY_LEVEL=99
 ENV GRPC_GO_LOG_SEVERITY_LEVEL=info
 WORKDIR /root
-COPY --from=builder /pollux-payload/src/c++/example/pollux-payload-example ./polluxapp
+COPY --from=builder /pollux-payload/src/c++/examples/pollux-payload-example ./polluxapp
 EXPOSE 22 
 #For Pollux Communication
 EXPOSE 50000
