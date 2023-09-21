@@ -16,4 +16,4 @@ jobs:
         submodules: true
 
     - name: create docker regress image
-      run: docker build . --file Dockerfile -t polluxapp
+      run: docker build . --file Dockerfile -t pollux-payload
