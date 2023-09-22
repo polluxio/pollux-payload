@@ -1,12 +1,16 @@
 <div align="center">
-<img width="150" alt="Pollux Logo" src="./docs/images/pollux.jpg"><h1>Pollux</h1>
+<img width="150" alt="Pollux Logo" src="./docs/images/pollux-logo.jpg"><h1>Pollux</h1>
 </div>
 
 
-## Introduction
+![Pollux Schema](./docs/images/pollux-general.png)
+
 **Pollux** is a Cloud orchestrator designed to distribute and manage complex algorithms, including NP-Hard and Complete problems, across multiple cloud-based machines.
 With **Pollux**, algorithms can seamlessly span the Cloud, ensuring synchronization and continuous communication among distributed components.
 **Pollux** has been designed in order to support multiple languages for Payload.
+
+**Pollux** architecture can be summarized in below
+![Pollux architecture](./docs/images/pollux-architecture.png)
 
 https://github.com/nuvulu/pollux-payload/assets/3635601/3fa89970-34cd-44c1-8359-9802c0719ff4
 
