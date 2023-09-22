@@ -1,7 +1,4 @@
-set (sources
-  PolluxPayload.cpp
-)
-
-add_executable(pollux-payload-example ${sources})
-
-target_link_libraries(pollux-payload-example pollux)
+add_subdirectory(test)
+IF(TBB_FOUND)
+  add_subdirectory(pso)
+ENDIF(TBB_FOUND)

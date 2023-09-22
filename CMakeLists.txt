@@ -11,5 +11,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 find_package(gRPC REQUIRED)
 find_package(Protobuf REQUIRED)
+find_package(TBB) #for PSO
 
 add_subdirectory(src)

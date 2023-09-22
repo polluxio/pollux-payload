@@ -6,9 +6,9 @@
 
 namespace {
 
-class PolluxPayloadExample: public PolluxPayload {
+class PolluxPayloadTest: public PolluxPayload {
   public:
-    PolluxPayloadExample(): PolluxPayload("pollux-payload-example") {}
+    PolluxPayloadTest(): PolluxPayload("pollux-payload-test") {}
 
     void init() override {
       auto maxIterationsOption = getUserOptionValue("nb_iterations");
@@ -112,6 +112,6 @@ class PolluxPayloadExample: public PolluxPayload {
 }
 
 int main(int argc, char** argv) {
-  auto payload = std::make_unique<PolluxPayloadExample>();
+  auto payload = std::make_unique<PolluxPayloadTest>();
   return Pollux::Main(argc, argv, payload.get());
 }
