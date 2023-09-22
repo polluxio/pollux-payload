@@ -85,8 +85,8 @@ class PolluxPayloadTest: public PolluxPayload {
         case pollux::PolluxMessage::kStrValue:
           logMessage << ", value=" << message->strvalue() << std::endl;
           break;
-        case pollux::PolluxMessage::kUint64Value:
-          logMessage << ", value=" << message->uint64value() << std::endl;
+        case pollux::PolluxMessage::kInt64Value:
+          logMessage << ", value=" << message->int64value() << std::endl;
           break;
         case pollux::PolluxMessage::kInt64ArrayValue:
           logMessage << ", value=";
@@ -95,8 +95,12 @@ class PolluxPayloadTest: public PolluxPayload {
           }
           logMessage << std::endl;
           break;
-        case pollux::PolluxMessage::kInt64Value:
-          logMessage << ", value=" << message->int64value() << std::endl;
+        case pollux::PolluxMessage::kDoubleArrayValue:
+          logMessage << ", value=";
+          for (auto v: message->doublearrayvalue().values()) {
+            logMessage << v << ", ";
+          }
+          logMessage << std::endl;
           break;
         default:
           break;

@@ -20,9 +20,6 @@ class ZebulonPayloadClient {
     void polluxCommunication(int destination, const std::string& key, const std::string& value);
     void polluxCommunication(const std::string& key, const std::string& value);
 
-    void polluxCommunication(const Destinations& destinations, const std::string& key, uint64_t value);
-    void polluxCommunication(int destination, const std::string& key, uint64_t value);
-    void polluxCommunication(const std::string& key, uint64_t value);
 
     void polluxCommunication(const Destinations& destinations, const std::string& key, int64_t value);
     void polluxCommunication(int destination, const std::string& key, int64_t value);
@@ -32,6 +29,11 @@ class ZebulonPayloadClient {
     void polluxCommunication(const Destinations& destinations, const std::string& key, const Int64Array& values);
     void polluxCommunication(int destination, const std::string& key, const Int64Array& values);
     void polluxCommunication(const std::string& key, const Int64Array& values);
+
+    using DoubleArray = std::vector<double>;
+    void polluxCommunication(const Destinations& destinations, const std::string& key, const DoubleArray& values);
+    void polluxCommunication(int destination, const std::string& key, const DoubleArray& values);
+    void polluxCommunication(const std::string& key, const DoubleArray& values);
 
     void polluxReport(const std::string& key, const std::string& value);
     std::string getString() const;
