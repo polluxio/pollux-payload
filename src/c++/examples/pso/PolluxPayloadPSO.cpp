@@ -153,8 +153,11 @@ class PolluxPayLoadPSO: public PolluxPayload {
          std::ostringstream PLOG_INFO;
          PLOG_INFO <<  "sending " << particle_->GetBestLocalPosition().first << " " << (particle_->GetBestLocalPosition().second);
 
-         PLOG_INFO <<  "sending string " << std::to_string(particle_->GetBestLocalPosition().first) << " " << std::to_string(particle_->GetBestLocalPosition().second);
-         client->polluxCommunication(std::to_string(particle_->GetBestLocalPosition().first), std::to_string(particle_->GetBestLocalPosition().second));
+         ZebulonPayloadClient::DoubleArray data {
+           particle_->GetBestLocalPosition().first,
+           particle_->GetBestLocalPosition().second
+         };
+         client->polluxCommunication("POSITION", data);
          PLOG_INFO << "size: " << _particlesData.size();
          spdlog::info("{}", PLOG_INFO.str());
          //sleep(1);
@@ -195,10 +198,15 @@ class PolluxPayLoadPSO: public PolluxPayload {
         << "origin=" << message->origin();
       logMessage << ", key=" << message->key();
       switch (message->value_case()) {
-        case pollux::PolluxMessage::kStrValue:
+        case pollux::PolluxMessage::kDoubleArrayValue:
+          if (message->doublearrayvalue().values_size() != 2) {
+            std::ostringstream reason;
+            reason << "malformed message: expecting two double values, got: " << message->doublearrayvalue().values_size();
+            throw PolluxPayloadException(reason.str());
+          }
           logMessage << ", value=" << message->strvalue() << std::endl;
-          _particlesData[message->origin()].first = std::stod(message->key());
-          _particlesData[message->origin()].second = std::stod(message->strvalue());;
+          _particlesData[message->origin()].first = message->doublearrayvalue().values()[0];
+          _particlesData[message->origin()].second = message->doublearrayvalue().values()[1];
           break;
         default:
           break;

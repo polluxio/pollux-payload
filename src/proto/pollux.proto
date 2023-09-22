@@ -36,6 +36,10 @@ message PolluxMessageInt64ArrayValue {
   repeated int64 values = 1 [packed=true];
 }
 
+message PolluxMessageDoubleArrayValue {
+  repeated double values = 1 [packed=true];
+}
+
 message PolluxMessage {
   uint32 origin  = 1;
   repeated uint32 destinations = 2 [packed=true];
@@ -44,7 +48,7 @@ message PolluxMessage {
     string strValue = 4;
     int64 int64Value = 5;
     PolluxMessageInt64ArrayValue int64ArrayValue = 6;
-    uint64 uint64Value = 7;
+    PolluxMessageDoubleArrayValue doubleArrayValue = 7;
   }
 }
 
