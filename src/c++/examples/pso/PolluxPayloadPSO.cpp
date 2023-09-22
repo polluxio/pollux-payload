@@ -17,14 +17,14 @@ class PolluxPayLoadPSO: public PolluxPayload {
   public:
     PolluxPayLoadPSO(): PolluxPayload("pollux-payload-pso") {}
 
-    void init() override {
-      auto Himmelblau = [](double x, double y) {return std::pow(x * x + y - 11, 2) + std::pow(x + y * y - 7, 2); };
+    void init(ZebulonPayloadClient* client) override {
+      auto himmelblau = [](double x, double y) {return std::pow(x * x + y - 11, 2) + std::pow(x + y * y - 7, 2); };
     
-      auto Levi = [](double x, double y) {
+      auto levi = [](double x, double y) {
           return std::pow(std::sin(3 * M_PI * x), 2) + std::pow(x - 1, 2) * (1 + std::pow(std::sin(3 * y * M_PI), 2))
               + std::pow(y - 1, 2) * (1 + std::pow(std::sin(2 * M_PI * y), 2));
       };
-      auto Rastrign = [](double x, double y) {
+      auto rastrign = [](double x, double y) {
           return
               20 + std::pow( x - 5, 2) - 10 * std::cos(2 * M_PI * ( x - 5)) + (y - 5)* (y - 5)- 10 * std::cos(2 * M_PI * (y - 5));
       };
@@ -44,7 +44,53 @@ class PolluxPayLoadPSO: public PolluxPayload {
           return std::pow(1.5-x + x*y, 2) + std::pow(2.25-x + x*std::pow(y,2), 2)
             + std::pow(2.65-x + x*std::pow(y,3), 2);
       };
-      func_ = eggholder;
+
+      auto nbIterationsOption = getUserOptionValue("nb_iterations");
+      if (nbIterationsOption) {
+        if (not (nbIterationsOption->index() == UserOptionType::LONG)) {
+          throw PolluxPayloadException("wrong nb_iterations option type: should be long");
+        }
+        iterationsNum_ = std::get<UserOptionType::LONG>(*nbIterationsOption);
+      }
+      spdlog::info("Number of iterations: {}", iterationsNum_);
+
+
+      std::string functionOptionStr = "eggholder";
+      auto functionOption = getUserOptionValue("function");
+      if (functionOption) {
+        if (not (functionOption->index() == UserOptionType::STRING)) {
+          throw PolluxPayloadException("wrong function option type: should be string");
+        }
+        functionOptionStr = std::get<UserOptionType::STRING>(*functionOption);
+      }
+
+      if (functionOptionStr == "himmelblau") {
+        func_ = himmelblau;
+      } else if (functionOptionStr == "levi") {
+        func_ = levi;
+      } else if (functionOptionStr == "rastrign") {
+        func_ = rastrign;
+      } else if (functionOptionStr == "parabole") {
+        func_ = parabole;
+      } else if (functionOptionStr == "multimodal") {
+        func_ = multimodal;
+      } else if (functionOptionStr == "beale") {
+        func_ = beale; 
+      } else if (functionOptionStr == "eggholder") {
+        func_ = eggholder;
+      } else {
+        spdlog::warn("Unknown function user value: {}, will set to eggholder", functionOptionStr);
+        functionOptionStr = "eggholder";
+        func_ = eggholder;
+      }
+      spdlog::info("Function: {}", functionOptionStr);
+
+      if (getLocalID() == 1) {
+        std::ostringstream message;
+        message << "number of iterations: " << iterationsNum_
+          << ", " << "function: " << functionOptionStr;
+        client->polluxReport("Options", message.str());
+      }
 
       std::vector<double> real_solutions;
       const int n = 100;
@@ -108,7 +154,7 @@ class PolluxPayLoadPSO: public PolluxPayload {
          PLOG_INFO <<  "sending " << particle_->GetBestLocalPosition().first << " " << (particle_->GetBestLocalPosition().second);
 
          PLOG_INFO <<  "sending string " << std::to_string(particle_->GetBestLocalPosition().first) << " " << std::to_string(particle_->GetBestLocalPosition().second);
-         client->polluxCommunication(-1, std::to_string(particle_->GetBestLocalPosition().first), std::to_string(particle_->GetBestLocalPosition().second));
+         client->polluxCommunication(std::to_string(particle_->GetBestLocalPosition().first), std::to_string(particle_->GetBestLocalPosition().second));
          PLOG_INFO << "size: " << _particlesData.size();
          spdlog::info("{}", PLOG_INFO.str());
          //sleep(1);
@@ -119,12 +165,19 @@ class PolluxPayLoadPSO: public PolluxPayload {
         spdlog::info("{}", PLOG_INFO.str());
       }
       for (int i = 0; i < getNumberOfPayloads(); i++) {
-        if (func_(_particlesData[i].first, _particlesData[i].second) < func_(bestSolution_.first, bestSolution_.second)) {
+        auto value = func_(_particlesData[i].first, _particlesData[i].second);
+        auto best = func_(bestSolution_.first, bestSolution_.second);
+        if (value < best) {
           bestSolution_ = _particlesData[i];
           std::ostringstream PLOG_INFO;
           PLOG_INFO <<  "FOUND NEW BEST" <<  " " << bestSolution_.first <<  " " << bestSolution_.second << " " << 
           func_(bestSolution_.first, bestSolution_.second);
           spdlog::info("{}", PLOG_INFO.str());
+          {
+            std::ostringstream report;
+            report << "Particle " << i+1 << " value: " << value << " at: " << bestSolution_.first << ":" << bestSolution_.second;
+            client->polluxReport("NEW BEST", report.str());
+          }
           particle_->SetBestGlobalPosition(bestSolution_);
         }
       }

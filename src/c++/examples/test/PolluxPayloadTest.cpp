@@ -10,7 +10,7 @@ class PolluxPayloadTest: public PolluxPayload {
   public:
     PolluxPayloadTest(): PolluxPayload("pollux-payload-test") {}
 
-    void init() override {
+    void init(ZebulonPayloadClient* client) override {
       auto maxIterationsOption = getUserOptionValue("nb_iterations");
       if (maxIterationsOption) {
         if (not (maxIterationsOption->index() == UserOptionType::LONG)) {

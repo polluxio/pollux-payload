@@ -33,7 +33,7 @@ class PolluxPayload {
     void setControl(const pollux::PolluxControl& control);
 
     //Following methods are accesible and can be overrided by final user
-    virtual void init() {}
+    virtual void init(ZebulonPayloadClient* client) {}
     virtual void loop(ZebulonPayloadClient* client) {}
     virtual void polluxCommunication(const pollux::PolluxMessage* message) {}
 

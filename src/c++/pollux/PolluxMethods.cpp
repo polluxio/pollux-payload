@@ -39,7 +39,7 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       spdlog::info("Start payload received");
       try {
         polluxPayLoad_->setControl(message->control());
-        polluxPayLoad_->init();
+        polluxPayLoad_->init(zebulonClient_);
         std::thread mainLoopThread(&PolluxPayload::loop, polluxPayLoad_, zebulonClient_);
         mainLoopThread.detach();
       } catch (const PolluxPayloadException& e) {
