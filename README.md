@@ -9,27 +9,29 @@
 With **Pollux**, algorithms can seamlessly span the Cloud, ensuring synchronization and continuous communication among distributed components.
 **Pollux** has been designed in order to support multiple languages for Payload.
 
-**Pollux** architecture can be summarized in below
+**Pollux** architecture can be summarized in picture below.
 ![Pollux architecture](./docs/images/pollux-architecture.png)
 
 https://github.com/nuvulu/pollux-payload/assets/3635601/3fa89970-34cd-44c1-8359-9802c0719ff4
 
 ## Use cases
 Currently, the following **Pollux** use cases can be found:
- - [Pollux payload example](): a simple test application deploying a configurable number of workers and showing
- - [Pollux PSO - Particle Swarm Optimization](): a [PSO](https://en.wikipedia.org/wiki/Particle_swarm_optimization) Pollux implementation.
+ - [Pollux payload example](https://github.com/nuvulu/pollux-payload/blob/main/src/c%2B%2B/examples/test): a simple test application deploying a configurable number of workers and showing
+ - [Pollux PSO - Particle Swarm Optimization](https://github.com/nuvulu/pollux-payload/tree/main/src/c%2B%2B/examples/pso): a [PSO](https://en.wikipedia.org/wiki/Particle_swarm_optimization) Pollux implementation.
  - [Pollux SAT](https://github.com/nuvulu/pollux-sat): a [SAT](https://en.wikipedia.org/wiki/Boolean_satisfiability_problem) Cloud orchestrator using a mix of divide&conquer and multi-threaded portfolios techniques. More details on the project page.
 
- Other applications in many fields can be 
-
 ## Building and Installing
+### Getting sources
 ```bash
+# First clone the repository
+git clone https://github.com/nuvulu/pollux-payload
+# go inside it and init submodules
+cd pollux-payload
 git submodule update --init --recursive
 ```
-
+At this point, you are good to test pollux, locally if you have docker installed or on the Cloud if you have an account.
 ## Runtime
 ### Configuration
-
 ### Modes
 Running modes are managed through the "-m" options. Following modes are supported:
 #### Local docker
