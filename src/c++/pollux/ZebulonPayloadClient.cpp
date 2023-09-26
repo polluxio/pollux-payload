@@ -40,6 +40,8 @@ void ZebulonPayloadClient::sendPayloadReady(uint16_t port) {
   request.set_info("I'm alive from: " + std::to_string(id_));
   request.set_port(port);
   request.set_allocated_version(version);
+  spdlog::debug("Sending Payload Ready with port {} and GRPC schema version {}",
+      port, pollux::PolluxVersion_Version::PolluxVersion_Version_CURRENT);
   pollux::PolluxStandardResponse response;
   grpc::Status status = stub_->PayloadReady(&context, request, &response);
   if (not status.ok()) {

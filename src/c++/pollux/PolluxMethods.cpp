@@ -123,23 +123,28 @@ int Pollux::Main(int argc, char** argv, PolluxPayload* polluxPayload) {
 
   std::string logFileName(polluxPayload->getName() + "-" + std::to_string(id) + ".log");
   auto myLogger = spdlog::basic_logger_mt("pollux_logger", logFileName.c_str());
-  std::string verbosity = program.get<std::string>("--verbosity");
-  if (verbosity == "debug") {
-    spdlog::set_level(spdlog::level::debug);
-  } else if (verbosity == "trace") {
-    spdlog::set_level(spdlog::level::trace);
-  } else {
-    if (verbosity != "info") {
-      spdlog::warn("unrecognized verbose level: {}, forcing to \"info\"", verbosity);
-    }
-    spdlog::set_level(spdlog::level::info);
-  }
   spdlog::flush_on(spdlog::level::info);
   spdlog::set_default_logger(myLogger);
   spdlog::flush_every(std::chrono::seconds(3));
   spdlog::info("########################################################");
   spdlog::info(logFileName);
   spdlog::info("########################################################");
+
+  std::string verbosity = program.get<std::string>("--verbosity");
+  if (verbosity == "debug") {
+    spdlog::set_level(spdlog::level::debug);
+    spdlog::info("set log level to debug");
+  } else if (verbosity == "trace") {
+    spdlog::set_level(spdlog::level::trace);
+    spdlog::info("set log level to trace");
+  } else {
+    if (verbosity != "info") {
+      spdlog::warn("unrecognized verbose level: {}, forcing to \"info\"", verbosity);
+    } else {
+      spdlog::info("set log level to info");
+    }
+    spdlog::set_level(spdlog::level::info);
+  }
 
   {
     std::ostringstream stream;
