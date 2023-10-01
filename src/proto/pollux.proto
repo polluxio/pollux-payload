@@ -7,7 +7,7 @@ package pollux;
 message PolluxVersion {
   enum Version {
     DUMMY = 0;
-    CURRENT = 5;
+    CURRENT = 6;
   }
   Version version = 1;
 }

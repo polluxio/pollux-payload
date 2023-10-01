@@ -66,13 +66,13 @@ class PolluxPayloadService final : public pollux::PolluxPayload::Service {
       return grpc::Status::OK;
     }
 
-    grpc::Status PolluxCommunication(
+    grpc::Status Transmit(
       grpc::ServerContext* context,
       const pollux::PolluxMessage* message,
       pollux::PolluxMessageResponse* response) override {
-      spdlog::debug("Pollux Communication received from zebulon");
-      polluxPayLoad_->polluxCommunication(message);
-      response->set_info("PolluxCommunication understood");
+      spdlog::debug("Pollux Transmission received from zebulon");
+      polluxPayLoad_->transmit(message);
+      response->set_info("Transmit understood");
       return grpc::Status::OK;
     }
     void setServer(grpc::Server* server) {

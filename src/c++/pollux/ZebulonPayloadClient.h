@@ -16,24 +16,24 @@ class ZebulonPayloadClient {
     
     //send communication to outside world
     using Destinations = std::vector<int>;
-    void polluxCommunication(const Destinations& destinations, const std::string& key, const std::string& value);
-    void polluxCommunication(int destination, const std::string& key, const std::string& value);
-    void polluxCommunication(const std::string& key, const std::string& value);
+    void transmit(const Destinations& destinations, const std::string& key, const std::string& value);
+    void transmit(int destination, const std::string& key, const std::string& value);
+    void transmit(const std::string& key, const std::string& value);
 
 
-    void polluxCommunication(const Destinations& destinations, const std::string& key, int64_t value);
-    void polluxCommunication(int destination, const std::string& key, int64_t value);
-    void polluxCommunication(const std::string& key, int64_t value);
+    void transmit(const Destinations& destinations, const std::string& key, int64_t value);
+    void transmit(int destination, const std::string& key, int64_t value);
+    void transmit(const std::string& key, int64_t value);
 
     using Int64Array = std::vector<int64_t>;
-    void polluxCommunication(const Destinations& destinations, const std::string& key, const Int64Array& values);
-    void polluxCommunication(int destination, const std::string& key, const Int64Array& values);
-    void polluxCommunication(const std::string& key, const Int64Array& values);
+    void transmit(const Destinations& destinations, const std::string& key, const Int64Array& values);
+    void transmit(int destination, const std::string& key, const Int64Array& values);
+    void transmit(const std::string& key, const Int64Array& values);
 
     using DoubleArray = std::vector<double>;
-    void polluxCommunication(const Destinations& destinations, const std::string& key, const DoubleArray& values);
-    void polluxCommunication(int destination, const std::string& key, const DoubleArray& values);
-    void polluxCommunication(const std::string& key, const DoubleArray& values);
+    void transmit(const Destinations& destinations, const std::string& key, const DoubleArray& values);
+    void transmit(int destination, const std::string& key, const DoubleArray& values);
+    void transmit(const std::string& key, const DoubleArray& values);
 
     void polluxReport(const std::string& key, const std::string& value);
     std::string getString() const;

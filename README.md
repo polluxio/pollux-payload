@@ -30,16 +30,21 @@ cd pollux-payload
 git submodule update --init --recursive
 ```
 At this point, you are good to test pollux, locally if you have docker installed or on the Cloud if you have an account.
-## Runtime
+## Quick Testing
 ### Configuration
 ### Modes
 Running modes are managed through the "-m" options. Following modes are supported:
 #### Local docker
 This is the easiest mode to use to get started and the best step to prepare for Cloud deployment.
-#### Local
-Local mode is 
 
-Once you have downloaded Pollux binaries (`pollux` and `zebulon`) from [here](). Untar the archive in a directory and set a $POLLUX_INSTALL environment variable pointing to this directory.
+Use the pollux test [image]() to rapdidly test pollux. For this purpose, use the following pollux launcher command:
+```bash
+# Following command will launch 4 workers
+python3 <pollux_payload_sources>/src/launcher/pollux.py -p polluxio/pollux-payload -m local_docker -n 4
+```
+#### Local
+Local mode needs Pollux binaries to be installed locally.
+Once you have downloaded them (`pollux` and `zebulon`) from [here](). Untar the archive in a directory and set a $POLLUX_INSTALL environment variable pointing to this directory.
 ```bash
 mkdir pollux_install
 cd pollux_install
@@ -47,9 +52,14 @@ wget pollux-latest.tar.gz
 tar xvzf pollux-latest.tar.gz
 export POLLUX_INSTALL $pwd
 ```
+Once this is done, launch in local mode:
+```bash
+# Following command will launch 4 workers
+python3 <pollux_payload_sources>/src/launcher/pollux.py -p polluxio/pollux-payload -m local -n 4
+```
 #### Cloud
 ##### Qarnot
-[Qarnot](https://qarnot.com) is a Cloud provider harnessing. **Qarnot** offers free trial credits in a couple of clicks. If you want to give it a try, first create an account on this [page](https://tasq.qarnot.com/login/).
+[Qarnot](https://qarnot.com) is a Cloud provider harnessing. **Qarnot** offers free trial credits in a couple of clicks. To try deployment on Qarnot, first create an account on this [page](https://tasq.qarnot.com/login/).
 Then retrieve your access token, save it locally and launch using following commands:
 ```bash
 python3 pollux.py -m qarnot -n 10
@@ -110,12 +120,9 @@ Copy relevant files:
 #create a thirdparty dir
 mkdir thirdparty
 cd thirdparty
-git submodule add https://github.com/gabime/spdlog
-#checkout latest release
-cd spdlog
-git checkout ad0e89c
-cd ..
-git submodule add https://github.com/p-ranav/argparse
-cd argparse
-git checkout 997da92
+git submodule add https://github.com/polluxio/pollux-payload
+```
+### Dockerfile
+
+```Dockerfile
 ```
