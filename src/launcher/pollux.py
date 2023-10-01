@@ -7,6 +7,7 @@ import argparse
 import datetime
 import subprocess
 import yaml
+import logging
 
 def create_pollux_configuration(path, args, nb_parts) -> None:
     if args.mode == 'local':
@@ -48,13 +49,13 @@ def create_pollux_yaml(args, pollux_path) -> int:
         os.remove(pollux_path)
     if args.initial_file:
         if os.path.isfile(args.initial_file):
+            logging.info('create \'pollux.yaml\' from %s', args.initial_file)
             shutil.copy2(args.initial_file, pollux_path)
             #read from yaml
             nb_parts = readparts_from_yaml(args.initial_file)
             return nb_parts
         else:
-            #error
-            return -1
+            logging.critical('%s is not a valid path', args.initial_file)
     else:
         create_pollux_configuration(pollux_path, args, args.nb_parts)
         return args.nb_parts
@@ -83,9 +84,13 @@ def clean_docker(client):
    clean_volumes(client)
 
 def run_local_mode(args) -> int:
+    logging.info('Running local mode')
     pollux_configuration = 'pollux.yaml'
     nb_parts = create_pollux_yaml(args, pollux_configuration)
     #
+    if "POLLUX_INSTALL" not in os.environ:
+        logging.critical('In local mode, $POLLUX_INSTALL env variable needs to be defined and point to POLLUX installation.') 
+
     pollux_path = "$POLLUX_INSTALL/pollux"
     pollux_bin = os.path.expandvars(pollux_path)
 
@@ -93,6 +98,7 @@ def run_local_mode(args) -> int:
     subprocess.run(pollux_bin, check=True)
 
 def run_local_docker_mode(args) -> int:
+    logging.info('Running local docker mode')
     pollux_path = 'pollux.yaml'
     nb_parts = create_pollux_yaml(args, pollux_path)
 
@@ -131,6 +137,7 @@ def run_local_docker_mode(args) -> int:
         client.containers.run(image, name=name, command=command, network='pollux', detach=True)
 
 def run_qarnot_mode(args) -> int:
+    logging.info('Running qarnot mode')
     import qarnot
     conn = qarnot.Connection('qarnot.conf')
 
@@ -242,14 +249,14 @@ def run_qarnot_mode(args) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description='Pollux Qarnot job submitter.')
-    parser.add_argument('-m', '--mode', help='Launch mode: Qarnot(default), local_docker',
+    parser.add_argument('-m', '--mode', help='Launch mode: local(default), local',
                         choices=['local', 'qarnot', 'local_docker'], action='store', default='local')
-    parser.add_argument('-t', '--task_name', help='Qarnot task name', action='store', default="")
-    parser.add_argument('-p', '--payload', help='payload name', action='store', default='polluxapp')
+    parser.add_argument('-t', '--task_name', help='qarnot task name', action='store', default="")
+    parser.add_argument('-c', '--container', help='container name', action='store', default='polluxio/pollux-payload-test')
     parser.add_argument('-i', '--input_bucket', help='input bucket name', action='store', default='pollux-qarnot-input')
     parser.add_argument('-o', '--output_bucket', help='output bucket name', action='store', default='pollux-qarnot-output')
     parser.add_argument('-s', '--ssh', help='enable ssh access on Qarnot side', action='store_true')
-    parser.add_argument('-c', '--clean_buckets',
+    parser.add_argument('-k', '--clean_buckets (qarnot mode only)',
       help='clean input and output buckets if they already exist before creating them. Meaningful only in Qarnot mode', action='store_true')
 
     group = parser.add_mutually_exclusive_group()
@@ -257,6 +264,11 @@ def main() -> int:
     group.add_argument('-f', '--initial_file', help='initial yaml file', action='store')
 
     args = parser.parse_args()
+
+    logging.basicConfig(filename='pollux-launcher.log', filemode='w',
+      level = logging.INFO,
+      format='%(asctime)s - %(levelname)s - %(message)s')
+
 
     if args.mode == 'local':
         run_local_mode(args)

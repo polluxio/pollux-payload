@@ -40,24 +40,24 @@ class PolluxPayloadTest: public PolluxPayload {
             {
               //random int
               int value = rand()%std::numeric_limits<int>::max();
-              client->polluxCommunication(id, "int64", (int64_t)value);
+              client->transmit(id, "int64", (int64_t)value);
               break;
             }
           case 1:
             {
               //random uint
               int value = rand()%std::numeric_limits<int>::max();
-              client->polluxCommunication(id, "uint64", (uint64_t)value);
+              client->transmit(id, "uint64", (uint64_t)value);
               break;
             }
           case 2:
             {
               //int array
-              client->polluxCommunication(id, "int64array", ZebulonPayloadClient::Int64Array({0, 10, 200, 3000, 40000, 500000}));
+              client->transmit(id, "int64array", ZebulonPayloadClient::Int64Array({0, 10, 200, 3000, 40000, 500000}));
               break;
             }
           default:
-            client->polluxCommunication(id, "string", "value");
+            client->transmit(id, "string", "value");
             break;
 
         }
@@ -76,7 +76,7 @@ class PolluxPayloadTest: public PolluxPayload {
       }
     }
 
-    void polluxCommunication(const pollux::PolluxMessage* message) override {
+    void transmit(const pollux::PolluxMessage* message) override {
       std::ostringstream logMessage;
       logMessage << "Pollux Message received: "
         << "origin=" << message->origin()

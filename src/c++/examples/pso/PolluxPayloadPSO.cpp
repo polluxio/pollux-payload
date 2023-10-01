@@ -157,7 +157,7 @@ class PolluxPayLoadPSO: public PolluxPayload {
            particle_->GetBestLocalPosition().first,
            particle_->GetBestLocalPosition().second
          };
-         client->polluxCommunication("POSITION", data);
+         client->transmit("POSITION", data);
          PLOG_INFO << "size: " << _particlesData.size();
          spdlog::info("{}", PLOG_INFO.str());
          //sleep(1);
@@ -192,7 +192,7 @@ class PolluxPayLoadPSO: public PolluxPayload {
       }
     }
 
-    void polluxCommunication(const pollux::PolluxMessage* message) override {
+    void transmit(const pollux::PolluxMessage* message) override {
       std::ostringstream logMessage;
       logMessage << "Pollux Message received: "
         << "origin=" << message->origin();
