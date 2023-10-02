@@ -23,9 +23,10 @@ def create_pollux_configuration(path, args, nb_parts) -> None:
     if args.mode == 'local':
         f.write('payload: ' + args.payload + '\n')
     elif args.mode == 'local_docker':
-        f.write('payload: christophealex/polluxapp' + '\n')
+        f.write('payload: pollux-payload-test' + '\n')
     f.write('port: 50000' + '\n')
     f.write('payloads_nb: ' + str(nb_parts) + '\n')
+    f.write('verbosity: trace\n')
     f.write('env_variables_to_collect:\n')
     if args.mode == 'qarnot':
         f.write('  - QARNOT_COMPUTE_API_URL\n')
@@ -112,9 +113,10 @@ def run_local_docker_mode(args) -> int:
     #create volume
     #pollux_volume = client.volumes.create(name='pollux', driver='local')
     #create network
+    logging.info("Create docker bridge network 'pollux'")
     client.networks.create("pollux", driver="bridge")
     #create master pollux
-    image = args.payload
+    image = args.container
     image += ":latest"
     pollux_configuration_path = os.path.abspath('pollux.yaml')
     pollux_volume_bind = {pollux_configuration_path: {'bind': '/pollux/pollux.yaml', 'mode': 'ro'}}
@@ -145,11 +147,13 @@ def run_qarnot_mode(args) -> int:
         qarnot_profile = 'docker-cluster-network-ssh'
     else:
         qarnot_profile = 'docker-cluster'
+    logging.info('Using %s profile', qarnot_profile)
+    logging.info('And %s container', args.container)
 
     if args.task_name != "":
         task_name = args.task_name
     else:
-        task_name = args.payload
+        task_name = args.container
         if args.ssh:
             task_name += '_ssh'
         task_name += '_' + datetime.datetime.now().strftime("%d_%m__%H_%M") 
@@ -161,7 +165,7 @@ def run_qarnot_mode(args) -> int:
     #snapshot every 5s
     task.snapshot(5)
 
-    task.constants["DOCKER_REPO"] = args.payload
+    task.constants["DOCKER_REPO"] = args.container
     task.constants["DOCKER_TAG"] = "latest"
 
     if args.clean_buckets:
@@ -252,23 +256,26 @@ def main() -> int:
     parser.add_argument('-m', '--mode', help='Launch mode: local(default), local',
                         choices=['local', 'qarnot', 'local_docker'], action='store', default='local')
     parser.add_argument('-t', '--task_name', help='qarnot task name', action='store', default="")
-    parser.add_argument('-c', '--container', help='container name', action='store', default='polluxio/pollux-payload-test')
+    parser.add_argument('-c', '--container', help='container name', action='store', default='polluxio/pollux-payload-examples')
     parser.add_argument('-i', '--input_bucket', help='input bucket name', action='store', default='pollux-qarnot-input')
     parser.add_argument('-o', '--output_bucket', help='output bucket name', action='store', default='pollux-qarnot-output')
     parser.add_argument('-s', '--ssh', help='enable ssh access on Qarnot side', action='store_true')
-    parser.add_argument('-k', '--clean_buckets (qarnot mode only)',
-      help='clean input and output buckets if they already exist before creating them. Meaningful only in Qarnot mode', action='store_true')
-
+    parser.add_argument('-k', '--clean_buckets',
+                        help='(Qarnot mode only): clean input and output buckets if they already exist before creating them.',
+                        action='store_true')
     group = parser.add_mutually_exclusive_group()
     group.add_argument('-n', '--nb_parts', help='number of parts', action='store', type=int, default=2)
     group.add_argument('-f', '--initial_file', help='initial yaml file', action='store')
 
     args = parser.parse_args()
 
-    logging.basicConfig(filename='pollux-launcher.log', filemode='w',
-      level = logging.INFO,
-      format='%(asctime)s - %(levelname)s - %(message)s')
-
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
+        handlers=[
+            logging.FileHandler("pollux_launcher.log"),
+            logging.StreamHandler()
+    ])
 
     if args.mode == 'local':
         run_local_mode(args)
