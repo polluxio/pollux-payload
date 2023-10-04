@@ -15,15 +15,12 @@ With **Pollux**, algorithms can seamlessly span the Cloud, ensuring synchronizat
 **Pollux** architecture can be summarized in picture below.
 ![Pollux architecture](./docs/images/pollux-architecture.png)
 
-https://github.com/nuvulu/pollux-payload/assets/3635601/3fa89970-34cd-44c1-8359-9802c0719ff4
-
 ---
 
 ## Motivation
 ![Pollux PSO](./docs/images/pollux-PSO.gif)
 
 <div align="right">[ <a href="#introduction">↑ Back to top ↑</a> ]</div>
-
 
 --
 
