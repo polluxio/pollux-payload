@@ -20,6 +20,7 @@ https://github.com/nuvulu/pollux-payload/assets/3635601/3fa89970-34cd-44c1-8359-
 ---
 
 ## Motivation
+![Pollux PSO](./docs/images/pollux-PSO.gif)
 
 <div align="right">[ <a href="#introduction">↑ Back to top ↑</a> ]</div>
 
