@@ -5,6 +5,10 @@
 
 ![Pollux Schema](./docs/images/pollux-general.png)
 
+---
+
+## Introduction (#introduction)
+
 **Pollux** is a Cloud orchestrator designed to distribute and manage complex algorithms, including NP-Hard and Complete problems, across multiple cloud-based machines.
 With **Pollux**, algorithms can seamlessly span the Cloud, ensuring synchronization and continuous communication among distributed components.
 **Pollux** has been designed in order to support multiple languages for Payload.
@@ -14,13 +18,25 @@ With **Pollux**, algorithms can seamlessly span the Cloud, ensuring synchronizat
 
 https://github.com/nuvulu/pollux-payload/assets/3635601/3fa89970-34cd-44c1-8359-9802c0719ff4
 
-## Use cases
+---
+
+## Table of Contents (#table-of-contents)
+- [Use Cases](#use-cases)
+- [Building And Installing](#building-and-installing)
+
+---
+
+## Use Cases (#use-cases)
 Currently, the following **Pollux** use cases can be found:
  - [Pollux payload example](https://github.com/nuvulu/pollux-payload/blob/main/src/c%2B%2B/examples/test): a simple test application deploying a configurable number of workers and showing
  - [Pollux PSO - Particle Swarm Optimization](https://github.com/nuvulu/pollux-payload/tree/main/src/c%2B%2B/examples/pso): a [PSO](https://en.wikipedia.org/wiki/Particle_swarm_optimization) Pollux implementation.
  - [Pollux SAT](https://github.com/nuvulu/pollux-sat): a [SAT](https://en.wikipedia.org/wiki/Boolean_satisfiability_problem) Cloud orchestrator using a mix of divide&conquer and multi-threaded portfolios techniques. More details on the project page.
 
-## Building and Installing
+ <div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
+
+--- 
+
+## Building and Installing(#building-and-installing)
 ### Getting sources
 ```bash
 # First clone the repository
