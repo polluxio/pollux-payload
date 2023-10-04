@@ -64,12 +64,6 @@ Then retrieve your access token, save it locally and launch using following comm
 ```bash
 python3 pollux.py -m qarnot -n 10
 ```
-##### Azure
-```bash
-python3 pollux.py -m azure -n 10
-```
-
-
 ## Launcher
 ### Pollux launcher
 To launch Pollux applications, a launcher python script is provided [here](https://github.com/nuvulu/pollux-payload/blob/main/src/launcher/pollux.py).
@@ -83,12 +77,14 @@ Then in a project directory, create an environment:
 ```bash
 python3 -m venv pollux
 ```
-And activate it:
+Then activate it:
 ```bash
 . pollux/bin/activate
 ```
 Now that the environment has been created and launched, you can install the following `Python` libraries:
-
+```bash
+pip install pyyaml
+```
 If you plan to use the docker local mode:
 ```bash
 pip install docker

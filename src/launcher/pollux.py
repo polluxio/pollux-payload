@@ -20,21 +20,14 @@ def create_pollux_configuration(path, args, nb_parts) -> None:
     f = open(path, "w")
     f.write('synchronized: true\n')
     f.write('executor: ' + executor + '\n')
-    if args.mode == 'local':
-        f.write('payload: ' + args.payload + '\n')
-    elif args.mode == 'local_docker':
-        f.write('payload: pollux-payload-test' + '\n')
+    f.write('payload: ' + args.payload + '\n')
     f.write('port: 50000' + '\n')
     f.write('payloads_nb: ' + str(nb_parts) + '\n')
-    f.write('verbosity: trace\n')
-    f.write('env_variables_to_collect:\n')
+    f.write('verbosity: ' + args.verbosity + '\n')
     if args.mode == 'qarnot':
+        f.write('env_variables_to_collect:\n')
         f.write('  - QARNOT_COMPUTE_API_URL\n')
         f.write('  - QARNOT_STORAGE_API_URL\n')
-    f.write('  - GRPC_TRACE\n')
-    f.write('  - GRPC_VERBOSITY\n')
-    f.write('  - GRPC_GO_LOG_VERBOSITY_LEVEL\n')
-    f.write('  - GRPC_GO_LOG_SEVERITY_LEVEL\n')
 
 def readparts_from_yaml(file) -> int:
     with open(file, 'r') as configFile:
@@ -253,10 +246,13 @@ def run_qarnot_mode(args) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description='Pollux Qarnot job submitter.')
-    parser.add_argument('-m', '--mode', help='Launch mode: local(default), local',
+    parser.add_argument('-m', '--mode', help='Launch mode',
                         choices=['local', 'qarnot', 'local_docker'], action='store', default='local')
+    parser.add_argument('-v', '--verbosity', help='Verbosity level',
+                        choices=['info', 'debug', 'trace'], action='store', default='info')
     parser.add_argument('-t', '--task_name', help='qarnot task name', action='store', default="")
     parser.add_argument('-c', '--container', help='container name', action='store', default='polluxio/pollux-payload-examples')
+    parser.add_argument('-p', '--payload', help='payload path', action='store', default='/root/pollux-payload-test')
     parser.add_argument('-i', '--input_bucket', help='input bucket name', action='store', default='pollux-qarnot-input')
     parser.add_argument('-o', '--output_bucket', help='output bucket name', action='store', default='pollux-qarnot-output')
     parser.add_argument('-s', '--ssh', help='enable ssh access on Qarnot side', action='store_true')
@@ -269,8 +265,12 @@ def main() -> int:
 
     args = parser.parse_args()
 
+    loggingLevel = logging.INFO
+    if args.verbosity != 'info':
+        loggingLevel = logging.DEBUG
+
     logging.basicConfig(
-        level=logging.INFO,
+        level=loggingLevel,
         format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
         handlers=[
             logging.FileHandler("pollux_launcher.log"),
