@@ -7,7 +7,7 @@
 
 ---
 
-## Introduction (#introduction)
+## [Introduction](#introduction)
 
 **Pollux** is a Cloud orchestrator designed to distribute and manage complex algorithms, including NP-Hard and Complete problems, across multiple cloud-based machines.
 With **Pollux**, algorithms can seamlessly span the Cloud, ensuring synchronization and continuous communication among distributed components.
@@ -20,13 +20,13 @@ https://github.com/nuvulu/pollux-payload/assets/3635601/3fa89970-34cd-44c1-8359-
 
 ---
 
-## Table of Contents (#table-of-contents)
+## [Table of Contents](#table-of-contents)
 - [Use Cases](#use-cases)
 - [Building And Installing](#building-and-installing)
 
 ---
 
-## Use Cases (#use-cases)
+## [Use Cases](#use-cases)
 Currently, the following **Pollux** use cases can be found:
  - [Pollux payload example](https://github.com/nuvulu/pollux-payload/blob/main/src/c%2B%2B/examples/test): a simple test application deploying a configurable number of workers and showing
  - [Pollux PSO - Particle Swarm Optimization](https://github.com/nuvulu/pollux-payload/tree/main/src/c%2B%2B/examples/pso): a [PSO](https://en.wikipedia.org/wiki/Particle_swarm_optimization) Pollux implementation.
@@ -36,7 +36,7 @@ Currently, the following **Pollux** use cases can be found:
 
 --- 
 
-## Building and Installing(#building-and-installing)
+## [Building and Installing](#building-and-installing)
 ### Getting sources
 ```bash
 # First clone the repository
@@ -80,7 +80,7 @@ Then retrieve your access token, save it locally and launch using following comm
 ```bash
 python3 pollux.py -m qarnot -n 10
 ```
-## Launcher
+## [Pollux Launcher]
 ### Pollux launcher
 To launch Pollux applications, a launcher python script is provided [here](https://github.com/nuvulu/pollux-payload/blob/main/src/launcher/pollux.py).
 
@@ -109,9 +109,8 @@ If you plan to launch on Qarnot:
 ```bash
 pip install qarnot
 ```
-
-
-## Write your own Pollux payload
+<div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
+## [Write your own Pollux payload](#write-your-own-pollux-payload)
 ### Supported Payload languages
 Currently, only `C++` is supported. `Python` support could be easily added (some early tests have been done).
 ### C++
