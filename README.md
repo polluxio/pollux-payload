@@ -2,18 +2,20 @@
 <img width="150" alt="Pollux Logo" src="./docs/images/pollux-logo.jpg"><h1>Pollux</h1>
 </div>
 
-
-![Pollux Schema](./docs/images/pollux-general.png)
-
 ---
 
 ## Introduction
-**Pollux** is a Message Passing Cloud orchestrator designed to distribute and manage complex algorithms, including NP-Hard and Complete problems, across multiple cloud-based machines.
-With **Pollux**, algorithms can seamlessly span the Cloud, ensuring synchronization and continuous communication among distributed components.
-**Pollux** has been designed in order to support multiple languages for Payload.
+**Pollux** is a Message Passing Cloud orchestrator designed to: 
+- distribute and manage complex algorithms, including NP-Hard and Complete problems, across multiple cloud-based machines.
+- span algorithms on the Cloud, ensuring synchronization and continuous communication among distributed components.
+- support different payload codes.
+- support different payload multiple programming languages.
 
-**Pollux** architecture can be summarized in picture below.
-![Pollux architecture](./docs/images/pollux-architecture.png)
+![Pollux Schema](./docs/images/pollux-general.png)
+
+:information_desk_person: If you have any questions, send us a [mail](mailto:contact@getpollux.io).
+
+:star: If you find Pollux interesting, and would like to stay up-to-date, consider starring this repo to help spread the word.
 
 ---
 
@@ -32,8 +34,16 @@ Currently, the following **Pollux** use cases can be found:
 
 <div align="right">[ <a href="#introduction">↑ Back to top ↑</a> ]</div>
 
---- 
+---
 
+## Architecture
+**Pollux** architecture can be summarized in picture below.
+![Pollux architecture](./docs/images/pollux-architecture.png)
+
+<div align="right">[ <a href="#introduction">↑ Back to top ↑</a> ]</div>
+
+---
+c
 ## Building and Installing
 ### Getting sources
 ```bash
