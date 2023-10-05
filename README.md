@@ -10,10 +10,16 @@
 
 - distribute and manage complex algorithms, including NP-Hard and Complete problems, across multiple cloud-based machines.
 - span algorithms on the Cloud, ensuring synchronization and continuous communication among distributed components.
-- support different payload codes.
-- support different payload multiple programming languages.
+- **robustness** by offering recover from local crash capabilities.
+- take advantage of Cloud cheaper 'Spot' instances by designing Cloud distributed applications where part of the application can be shutdown while the overall application survives.
+- support multiple payload types.
+- support multiple payload multiple programming languages.
+- support multiple payload hardware: design applications where  CPU, GPU, FPGAs, ... are collaborating live.
+- offer easy reporting for algorithmic dimensioning and fine tuning.
 
-![Pollux Schema](./docs/images/pollux-general.png)
+Following video shows a [PSO - Particle Swarm Optimization](https://github.com/polluxio/pollux-payload/tree/main/src/c%2B%2B/examples/pso) application developed using **Pollux** API.
+
+[Pollux PSO](./docs/images/pollux-PSO.gif)
 
 :information_desk_person: If you have any questions, send us a [mail](mailto:christophe.alexandre@getpollux.io).
 
@@ -24,13 +30,19 @@
 ## Motivation
 
 In today's world many computational problems from network routing to semiconductors to AI are becoming more and more complex.
-We believe that the next path for optimization of such complex grand scale computation is to leverage the massive parallelization the cloud can offer. 
-We believe that this step was not fully taken as there is no real cloud suitable framework for this kind of computation and most of the ones which were used for this purpose were actually meant for supercomputers and not eh cloud.
-Our goal is to provide such a framework that will be both designed for cloud architecture and will be simple to use with a clear interface for engineers from any field to use in order to parallelize any algorithm without being cloud experts.
-Our goal is not to treat the cloud as a super computer, it is not. Our goal is to virtualize a super computer on the cloud and finally open these capabilities to a wider audience. . 
 
+We believe that the next path for optimization of such complex grand scale computation is to leverage the massive parallelization the cloud can offer.
 
-![Pollux PSO](./docs/images/pollux-PSO.gif)
+We believe that this step was not fully taken as there is no real cloud suitable framework for this kind of computation and most of the ones which were used for this purpose were actually meant for supercomputers and not the cloud.
+
+Our goal is to provide such a framework that will be both designed for Cloud architecture and will be simple to use with a clear interface for engineers from any field to use in order to parallelize any algorithm without being cloud experts.
+
+Our goal is not to treat the Cloud as a super computer, it is not.
+Our goal is to virtualize a super computer on the cloud and finally open these capabilities to a wider audience.
+
+Pollux general principle is summarized in following figure.
+
+![Pollux Schema](./docs/images/pollux-general.png)
 
 <div align="right">[ <a href="#introduction">↑ Back to top ↑</a> ]</div>
 
@@ -41,7 +53,7 @@ Our goal is not to treat the cloud as a super computer, it is not. Our goal is t
 Currently, the following **Pollux** use cases can be found:
 
 - [Pollux payload example](https://github.com/polluxio/pollux-payload/blob/main/src/c%2B%2B/examples/test): a simple test application deploying a configurable number of workers and showing
-- [Pollux PSO - Particle Swarm Optimization](https://github.com/polluxio/pollux-payload/tree/main/src/c%2B%2B/examples/pso): a [PSO](https://en.wikipedia.org/wiki/Particle_swarm_optimization) Pollux implementation.
+- [Pollux PSO - Particle Swarm Optimization](https://github.com/polluxio/pollux-payload/tree/main/src/c%2B%2B/examples/pso): a [PSO](https://en.wikipedia.org/wiki/Particle_swarm_optimization) Pollux implementation (This application has been used to create the upper video).
 - [Pollux SAT](https://github.com/polluxio/pollux-sat): a [SAT](https://en.wikipedia.org/wiki/Boolean_satisfiability_problem) Cloud application using a mix of divide&conquer and multi-threaded portfolios techniques. More details on the project page.
 
 <div align="right">[ <a href="#introduction">↑ Back to top ↑</a> ]</div>
@@ -52,10 +64,12 @@ Currently, the following **Pollux** use cases can be found:
 
 **Pollux** is both:
 
-- a distributed Payload API (C++ for the moment, more to come in the future)
-- and a Cloud orchestrator
+- a distributed Payload API (C++ for the moment, more to come in the future).
+- and a Cloud orchestrator.
 The overall architecture can be summarized in picture below. 
 ![Pollux architecture](./docs/images/pollux-architecture.png)
+
+A REST API allowing users to access live the running application is under development.
 
 <div align="right">[ <a href="#introduction">↑ Back to top ↑</a> ]</div>
 
@@ -107,6 +121,7 @@ python3 <pollux_payload_sources>/src/launcher/pollux.py -p <path_to_payload> -m 
 ---
 
 ### Local docker
+
 This is the easiest mode to use to get started and the best step to prepare for Cloud deployment.
 
 Use the pollux test [image](https://hub.docker.com/repository/docker/polluxio/pollux-payload-examples/general) to quickly test pollux.
@@ -211,5 +226,47 @@ git submodule add https://github.com/polluxio/pollux-payload
 
 ### Dockerfile
 
+Once you **Pollux** payload is ready to be tested, in order to launch in [Local Docker](#local-docker)
+or on the Cloud, you need to write your own `Dockerfile`.
+
+This [Dockerfile](https://github.com/polluxio/pollux-payload/blob/main/Dockerfile) is the best starting point:
+
 ```Dockerfile
+FROM ubuntu:latest AS builder
+
+# Update Ubuntu Software repository
+# And install needed components for your payload
+RUN apt-get update && apt-get -y install \
+    cmake \
+    make  \
+    g++ \
+    protobuf-compiler-grpc
+
+WORKDIR /my-pollux-payload
+#COPY you application components
+COPY cmake cmake
+COPY src src
+COPY thirdparty thirdparty
+COPY CMakeLists.txt .
+RUN cmake . && make -j$(nproc)
+
+FROM polluxio/pollux:latest AS my-pollux-payload
+#add eventual runtime libraries in below command
+RUN apt-get update && apt-get -y install libgrpc++ 
+
+WORKDIR /root
+COPY --from=builder /my-pollux-payload/src/c++/my-payload
+#For Pollux Communication
+EXPOSE 50000
 ```
+
+Once the file is ready you will need folowing commands to create your docker image:
+
+```bash
+docker build --target my-pollux-payload --file Dockerfile . -t my-pollux-payload
+docker tag my-pollux-payload mydockerrepository/my-pollux-payload
+docker push mydockerrepository/my-pollux-payload
+```
+
+Once this is done, you should be able to run your own payload by referencing it with the
+'-p' switch of the **Pollux** launcher.
