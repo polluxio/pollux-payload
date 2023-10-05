@@ -45,7 +45,7 @@ Our goal is to virtualize a super computer on the Cloud and finally open these c
 
 ![Pollux Schema](./docs/images/pollux-general.png)
 
-<div align="right">[ <a href="#introduction">↑ Back to top ↑</a> ]</div>
+<div align="right">[ <a href="#pollux">↑ Back to top ↑</a> ]</div>
 
 ---
 
