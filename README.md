@@ -57,7 +57,7 @@ Currently, the following **Pollux** use cases are provided:
 - [Pollux PSO - Particle Swarm Optimization](https://github.com/polluxio/pollux-payload/tree/main/src/c%2B%2B/examples/pso): a [PSO](https://en.wikipedia.org/wiki/Particle_swarm_optimization) Pollux implementation (This application has been used to create the upper video).
 - [Pollux SAT](https://github.com/polluxio/pollux-sat): a [SAT](https://en.wikipedia.org/wiki/Boolean_satisfiability_problem) Cloud application using a mix of divide&conquer and multi-threaded portfolios techniques. More details on the project page.
 
-<div align="right">[ <a href="#introduction">↑ Back to top ↑</a> ]</div>
+<div align="right">[ <a href="#pollux">↑ Back to top ↑</a> ]</div>
 
 ---
 
@@ -72,7 +72,7 @@ The overall architecture can be summarized in picture below.
 
 A REST API allowing users to access live the running application is under development.
 
-<div align="right">[ <a href="#introduction">↑ Back to top ↑</a> ]</div>
+<div align="right">[ <a href="#pollux">↑ Back to top ↑</a> ]</div>
 
 ---
 
@@ -117,7 +117,7 @@ Once this is done, launch in local mode:
 python3 <pollux_payload_sources>/src/launcher/pollux.py -p <path_to_payload> -m local -n 4
 ```
 
-<div align="right">[ <a href="#introduction">↑ Back to top ↑</a> ]</div>
+<div align="right">[ <a href="#pollux">↑ Back to top ↑</a> ]</div>
 
 ---
 
@@ -141,7 +141,7 @@ Following command will launch the **PSO** example using 8 workers:
 python3 <pollux-payload-sources>~/pollux.py -m local_docker -c polluxio/pollux-payload-examples -p /root/pollux-payload-pso -n 8 
 ```
 
-<div align="right">[ <a href="#introduction">↑ Back to top ↑</a> ]</div>
+<div align="right">[ <a href="#pollux">↑ Back to top ↑</a> ]</div>
 
 ---
 
@@ -158,7 +158,7 @@ Then retrieve your access token, save it locally ('qarnot.conf) and then launch 
 python3 <pollux-payload-sources>/pollux.py -m qarnot -c polluxio/pollux-payload-examples -p /root/pollux-payload-pso -n 3 
 ```
 
-<div align="right">[ <a href="#introduction">↑ Back to top ↑</a> ]</div>
+<div align="right">[ <a href="#pollux">↑ Back to top ↑</a> ]</div>
 
 ---
 
@@ -195,7 +195,7 @@ pip install docker
 pip install qarnot
 ```
 
-<div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
+<div align="right">[ <a href="#pollux">↑ Back to top ↑</a> ]</div>
 
 ---
 
@@ -271,3 +271,5 @@ docker push mydockerrepository/my-pollux-payload
 
 Once this is done, you should be able to run your own payload by referencing it with the
 '-p' switch of the **Pollux** launcher.
+
+<div align="right">[ <a href="#pollux">↑ Back to top ↑</a> ]</div>
