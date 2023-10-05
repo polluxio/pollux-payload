@@ -17,9 +17,9 @@
 - support multiple payload hardware: design applications where  CPU, GPU, FPGAs, ... are collaborating live.
 - offer easy reporting for algorithmic dimensioning and fine tuning.
 
-Following video shows a [PSO - Particle Swarm Optimization](https://github.com/polluxio/pollux-payload/tree/main/src/c%2B%2B/examples/pso) application developed using **Pollux** API.
+Following video shows a [PSO - Particle Swarm Optimization](https://github.com/polluxio/pollux-payload/tree/main/src/c%2B%2B/examples/pso) application example developed using **Pollux** API. This application is available for testing (see below).
 
-[Pollux PSO](./docs/images/pollux-PSO.gif)
+![Pollux PSO](./docs/images/pollux-PSO.gif)
 
 :information_desk_person: If you have any questions, send us a [mail](mailto:christophe.alexandre@getpollux.io).
 
@@ -31,16 +31,16 @@ Following video shows a [PSO - Particle Swarm Optimization](https://github.com/p
 
 In today's world many computational problems from network routing to semiconductors to AI are becoming more and more complex.
 
-We believe that the next path for optimization of such complex grand scale computation is to leverage the massive parallelization the cloud can offer.
+We believe that the next path for optimization of such complex grand scale computation is to leverage the massive parallelization the Cloud can offer.
 
 We believe that this step was not fully taken as there is no real cloud suitable framework for this kind of computation and most of the ones which were used for this purpose were actually meant for supercomputers and not the cloud.
 
 Our goal is to provide such a framework that will be both designed for Cloud architecture and will be simple to use with a clear interface for engineers from any field to use in order to parallelize any algorithm without being cloud experts.
 
 Our goal is not to treat the Cloud as a super computer, it is not.
-Our goal is to virtualize a super computer on the cloud and finally open these capabilities to a wider audience.
+Our goal is to virtualize a super computer on the Cloud and finally open these capabilities to a wider audience.
 
-Pollux general principle is summarized in following figure.
+**Pollux** general principle is summarized in following figure.
 
 ![Pollux Schema](./docs/images/pollux-general.png)
 
@@ -50,7 +50,7 @@ Pollux general principle is summarized in following figure.
 
 ## Use Cases
 
-Currently, the following **Pollux** use cases can be found:
+Currently, the following **Pollux** use cases are provided:
 
 - [Pollux payload example](https://github.com/polluxio/pollux-payload/blob/main/src/c%2B%2B/examples/test): a simple test application deploying a configurable number of workers and showing
 - [Pollux PSO - Particle Swarm Optimization](https://github.com/polluxio/pollux-payload/tree/main/src/c%2B%2B/examples/pso): a [PSO](https://en.wikipedia.org/wiki/Particle_swarm_optimization) Pollux implementation (This application has been used to create the upper video).
