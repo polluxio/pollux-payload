@@ -26,7 +26,7 @@
 In today's world many computational problems from network routing to semiconductors to AI are becoming more and more complex.
 We believe that the next path for optimization of such complex grand scale computation is to leverage the massive parallelization the cloud can offer. 
 We believe that this step was not fully taken as there is no real cloud suitable framework for this kind of computation and most of the ones which were used for this purpose were actually meant for supercomputers and not the cloud.
-Our goal is to provide such a framework that will be both designed for cloud architecture and will be simple to use with a clear interface for engineers from any field to use in order to parallelize any algorithm without being cloud experts.
+Our goal is to provide such a framework that will be both designed for cloud architecture and will also be simple to use with a clear interface for engineers from any field to use in order to parallelize any algorithm without being cloud experts.
 Our goal is not to treat the cloud as a super computer, it is not. Our goal is to virtualize a super computer on the cloud and finally open these capabilities to a wider audience. . 
 
 
