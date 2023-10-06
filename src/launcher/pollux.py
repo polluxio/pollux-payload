@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# SPDX-FileCopyrightText: 2023 Pollux authors <https://github.com/polluxio/pollux-payload/blob/main/AUTHORS>
+# SPDX-License-Identifier: Apache-2.0
+
 import os
 import shutil
 import sys

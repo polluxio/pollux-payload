@@ -41,7 +41,7 @@ Through a clear interface they should be able to parallelize any algorithm witho
 Our goal is not to treat the Cloud as a super computer, it is not.
 Our goal is to virtualize a super computer on the Cloud and finally open these capabilities to a wider audience.
 
-**Pollux**'s general principle is summarized in following figure.
+**Pollux**'s general principle is summarized in the following figure.
 
 ![Pollux Schema](./docs/images/pollux-general.png)
 

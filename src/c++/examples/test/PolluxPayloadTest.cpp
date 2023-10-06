@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2023 Pollux authors <https://github.com/polluxio/pollux-payload/blob/main/AUTHORS>
+// SPDX-License-Identifier: Apache-2.0
+
 #include <sstream>
 #include <thread>
 #include "spdlog/spdlog.h"
