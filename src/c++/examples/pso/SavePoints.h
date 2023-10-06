@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2023 Pollux authors <https://github.com/polluxio/pollux-payload/blob/main/AUTHORS>
+// SPDX-License-Identifier: Apache-2.0
+// Inspired by:
+// https://github.com/Swistusmen/Particle-Swarm-Optimization
+
 #include <fstream>
 #include <vector>
 #include <functional>
