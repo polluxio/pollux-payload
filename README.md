@@ -6,7 +6,7 @@
 
 # Pollux
 
-**Pollux** is a Message Passing Cloud orchestrator designed to: 
+**Pollux** is a Message Passing Cloud orchestrator designed to:
 
 - distribute and manage complex algorithms, including NP-Hard and Complete problems, across multiple Cloud-based machines.
 - span algorithms on the Cloud, ensuring synchronization and continuous communication among distributed components.
@@ -53,9 +53,8 @@ Our goal is to virtualize a super computer on the Cloud and finally open these c
 
 Currently, the following **Pollux** use cases are provided:
 
-- [Pollux payload example](https://github.com/polluxio/pollux-payload/blob/main/src/c%2B%2B/examples/test): a simple test application deploying a configurable number of workers and showing
+- [Pollux payload example](https://github.com/polluxio/pollux-payload/blob/main/src/c%2B%2B/examples/test): a simple test application deploying a configurable number of workers and exchanging random messages between them.
 - [Pollux PSO - Particle Swarm Optimization](https://github.com/polluxio/pollux-payload/tree/main/src/c%2B%2B/examples/pso): a [PSO](https://en.wikipedia.org/wiki/Particle_swarm_optimization) Pollux implementation (This application has been used to create the upper video).
-- [Pollux SAT](https://github.com/polluxio/pollux-sat): a [SAT](https://en.wikipedia.org/wiki/Boolean_satisfiability_problem) Cloud application using a mix of divide&conquer and multi-threaded portfolios techniques. More details on the project page.
 
 <div align="right">[ <a href="#pollux">↑ Back to top ↑</a> ]</div>
 
@@ -67,10 +66,10 @@ Currently, the following **Pollux** use cases are provided:
 
 - a distributed Payload API (C++ for the moment, more to come in the future).
 - and a Cloud orchestrator.
-The overall architecture can be summarized in picture below. 
+The overall architecture is summarized in the following picture.
 ![Pollux architecture](./docs/images/pollux-architecture.png)
 
-A REST API allowing users to access live the running application is under development.
+A REST API allowing users live access to the running application is under development.
 
 <div align="right">[ <a href="#pollux">↑ Back to top ↑</a> ]</div>
 
@@ -87,21 +86,25 @@ git clone https://github.com/polluxio/pollux-payload
 cd pollux-payload
 git submodule update --init --recursive
 ```
-At this point, you are good to test pollux, locally if you have docker installed or on the Cloud if you have an account.
+
+If you have access to a Cloud provider (we ony support [Qarnot](#cloud---qarnot) for the moment, more to come soon), 
+at this point, you are good to test pollux, locally if you have docker installed or on the Cloud if you have an account.
 
 ## Running
 
-Running modes are managed through the **Pollux** [launcher](#pollux-launcher) '-m' option. Following modes are supported:
+Running modes are managed through the **Pollux** [launcher](#pollux-launcher) '-m' option. The following modes are supported:
 
 ### Local
+
 If you have **Docker** installed on your system, we suggest to directly use the [local docker](#local-docker) mode.
 
-To use this, mode **Pollux** binaries need to be installed locally. We provide binaries compiled for Ubuntu in pollux-payload release.
+To use this mode, **Pollux** binaries need to be installed locally. We provide binaries compiled for Ubuntu
+in the pollux-payload release.
 
 If you face any compatibility issue or you need binaries for another Linux version,
 please contact [us](mailto:christophe.alexandre@getpollux.io). 
-Once you have downloaded them (`pollux` and `zebulon`).
-Untar the archive in a directory and set a $POLLUX_INSTALL environment variable pointing to that directory.
+Once you have downloaded the binaries (`pollux` and `zebulon`),
+untar the archive in a directory and set a $POLLUX_INSTALL environment variable pointing to that directory.
 
 ```bash
 mkdir pollux_install
@@ -110,7 +113,7 @@ tar xvzf pollux.tar.gz
 export POLLUX_INSTALL pollux_install
 ```
 
-Once this is done, launch in local mode:
+Once this is done, run the local mode:
 
 ```bash
 # Following command will launch 4 workers
@@ -123,10 +126,10 @@ python3 <pollux_payload_sources>/src/launcher/pollux.py -p <path_to_payload> -m 
 
 ### Local docker
 
-This is the easiest mode to use to get started and the best step to prepare for Cloud deployment.
+This is the easiest mode to use to get started and a good first step to prepare for Cloud deployment.
 
-Use the pollux test [image](https://hub.docker.com/repository/docker/polluxio/pollux-payload-examples/general) to quickly test pollux.
-For this purpose, use the following pollux launcher command:
+Use the pollux test [image](https://hub.docker.com/repository/docker/polluxio/pollux-payload-examples/general)
+to quickly test Pollux by running the following Pollux launcher command:
 
 ```bash
 # Following command will launch 4 workers
@@ -135,7 +138,7 @@ For this purpose, use the following pollux launcher command:
 python3 <pollux-payload-sources>/pollux.py -m local_docker -c polluxio/pollux-payload-examples -p /root/pollux-payload-test -n 4 
 ```
 
-Following command will launch the **PSO** example using 8 workers:
+The following command launches the **PSO** example with 8 workers:
 
 ```bash
 python3 <pollux-payload-sources>~/pollux.py -m local_docker -c polluxio/pollux-payload-examples -p /root/pollux-payload-pso -n 8 
@@ -147,11 +150,12 @@ python3 <pollux-payload-sources>~/pollux.py -m local_docker -c polluxio/pollux-p
 
 ### Cloud - Qarnot
 
-[Qarnot](https://qarnot.com) is a Cloud provider proposing a unique approach to Cloud computing by utilizing the wasted heat generated by computer servers to heat buildings. 
+[Qarnot](https://qarnot.com) is a Cloud provider with a unique approach to Cloud computing in which the wasted heat generated by computer servers is recycled to heat buildings.
 
-**Qarnot** offers free trial credits in a couple of clicks. To try deployment on **Qarnot**, first create an account on this [page](https://tasq.qarnot.com/login/).
+**Qarnot** offers free trial credits accessible in a few clicks.
+To try deployment on **Qarnot**, first create an account on this [page](https://tasq.qarnot.com/login/).
 
-Then retrieve your access token, save it locally ('qarnot.conf) and then launch using following command:
+Retrieve your access token, save it locally ('qarnot.conf) and then launch Pollux using the following command:
 
 ```bash
 #Launching on Qarnot with 3 workers
@@ -162,24 +166,25 @@ python3 <pollux-payload-sources>/pollux.py -m qarnot -c polluxio/pollux-payload-
 
 ---
 
-## Pollux Launcher
+## Pollux launcher
 
-To launch Pollux applications, a launcher `Python` script is provided [here](https://github.com/polluxio/pollux-payload/blob/main/src/launcher/pollux.py).
+To launch Pollux applications, a `Python` script launcher is provided
+[here](https://github.com/polluxio/pollux-payload/blob/main/src/launcher/pollux.py).
 
-Most convenient way is to create a `Python` virtual environment. With Python 3:
+A convenient way to proceed is to create a `Python` virtual environment. With Python 3:
 
 ```bash
 apt-get install python3-venv
 pip3 install virtualenv
 ```
 
-Then in a project directory, create an environment:
+In a project directory, create an environment:
 
 ```bash
 python3 -m venv pollux
 ```
 
-Then activate it:
+Activate it:
 
 ```bash
 . pollux/bin/activate
@@ -201,9 +206,9 @@ pip install qarnot
 
 ## Write your own Pollux payload
 
-### Supported Payload languages
+### Supported payload languages
 
-Currently, only `C++` is supported. `Python` support for instance could be easily added (some early tests have been done).
+Currently, only `C++` is supported. `Python` support, for instance, could easily be added (some early tests have been done).
 
 ### C++
 
@@ -227,7 +232,7 @@ git submodule add https://github.com/polluxio/pollux-payload
 
 ### Dockerfile
 
-Once you **Pollux** payload is ready to be tested, in order to launch in [Local Docker](#local-docker)
+Once your **Pollux** payload is ready to be tested, in order to launch in [Local Docker](#local-docker)
 or on the Cloud, you need to write your own `Dockerfile`.
 
 This [Dockerfile](https://github.com/polluxio/pollux-payload/blob/main/Dockerfile) is the best starting point:
@@ -261,7 +266,7 @@ COPY --from=builder /my-pollux-payload/src/c++/my-payload
 EXPOSE 50000
 ```
 
-Once the file is ready you will need folowing commands to create your docker image:
+Once the Dockerfile written, run the folowing commands to create your docker image:
 
 ```bash
 docker build --target my-pollux-payload --file Dockerfile . -t my-pollux-payload
@@ -269,7 +274,7 @@ docker tag my-pollux-payload mydockerrepository/my-pollux-payload
 docker push mydockerrepository/my-pollux-payload
 ```
 
-Once this is done, you should be able to run your own payload by referencing it with the
+You should then be able to run your own payload by referencing it with the
 '-p' switch of the **Pollux** launcher.
 
 <div align="right">[ <a href="#pollux">↑ Back to top ↑</a> ]</div>
