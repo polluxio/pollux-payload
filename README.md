@@ -25,6 +25,9 @@ Following video shows a [PSO - Particle Swarm Optimization](https://github.com/p
 
 :star: If you find Pollux interesting, and would like to stay up-to-date, consider starring this repo to help spread the word.
 
+:exclamation: Pollux payload API is distributed under Apache 2 license.
+Additionally, the Pollux orchestrator is made available through binary releases, which can be accessed either as direct binaries or Docker images.
+
 ---
 
 ## Motivation
