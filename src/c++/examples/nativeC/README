@@ -1,0 +1,10 @@
+create pollux.so and pollux.h through:
+cd pollux/cmd/pollux/
+make lib
+
+copy pollux.h and pollux.so
+
+compile the c program with:
+
+cmake .
+make
