@@ -1,0 +1,4 @@
+synchronized: true
+executor: local
+payload: /build/src/c++/examples/test/pollux-payload-test
+payloads_nb: 5
