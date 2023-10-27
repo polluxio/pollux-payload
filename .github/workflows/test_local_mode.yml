@@ -38,6 +38,9 @@ jobs:
         latest: true
         fileName: "*"
     
+    - name: Set pollux executable permissions
+      run: chmod +x ${POLLUX_INSTALL}/pollux; chmod +x ${POLLUX_INSTALL}/zebulon  
+      
     - name: Test
       env:
         POLLUX_INSTALL: ${{github.workspace}}
