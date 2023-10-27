@@ -36,4 +36,9 @@ jobs:
     - uses: robinraju/release-downloader@v1.8
       with:
         latest: true
-        fileName: "pollux|zebulon"
+        fileName: "*"
+    
+    - name: Test
+      env:
+        POLLUX_INSTALL: ${{github.workspace}}
+      run: pollux 
