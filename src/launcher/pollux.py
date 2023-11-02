@@ -36,10 +36,10 @@ def readparts_from_yaml(file) -> int:
     with open(file, 'r') as configFile:
         content = yaml.safe_load(configFile) 
         try:
-            print(content)
+            #print(content)
             return content["payloads_nb"]
         except:
-            print("Unknown field")
+            logging.critical('Unknown field')
 
 def create_pollux_yaml(args, pollux_path) -> int:
     if os.path.exists(pollux_path):
@@ -112,8 +112,8 @@ def run_local_docker_mode(args) -> int:
     logging.info("Create docker bridge network 'pollux'")
     client.networks.create("pollux", driver="bridge")
     #create master pollux
-    image = args.container
-    image += ":latest"
+    image = args.image
+    image += ":" + args.image_tag
     pollux_configuration_path = os.path.abspath('pollux.yaml')
     pollux_volume_bind = {pollux_configuration_path: {'bind': '/pollux/pollux.yaml', 'mode': 'ro'}}
     pollux_ports_bind = {'443/tcp': 443}
@@ -144,12 +144,12 @@ def run_qarnot_mode(args) -> int:
     else:
         qarnot_profile = 'docker-cluster'
     logging.info('Using %s profile', qarnot_profile)
-    logging.info('And %s container', args.container)
+    logging.info('And %s docker image', args.image)
 
     if args.task_name != "":
         task_name = args.task_name
     else:
-        task_name = args.container
+        task_name = args.image
         if args.ssh:
             task_name += '_ssh'
         task_name += '_' + datetime.datetime.now().strftime("%d_%m__%H_%M") 
@@ -161,8 +161,8 @@ def run_qarnot_mode(args) -> int:
     #snapshot every 5s
     task.snapshot(5)
 
-    task.constants["DOCKER_REPO"] = args.container
-    task.constants["DOCKER_TAG"] = "latest"
+    task.constants["DOCKER_REPO"] = args.image
+    task.constants["DOCKER_TAG"] = args.image_tag
 
     if args.clean_buckets:
         try:
@@ -203,7 +203,7 @@ def run_qarnot_mode(args) -> int:
     # Store if an error happened during the process
     error_happened = False
     try:
-        print("** Submitting %s..." % task.name)
+        logging.info('** Submitting %s...' % task.name)
         task.submit()
 
         last_state = ''
@@ -212,7 +212,7 @@ def run_qarnot_mode(args) -> int:
         while not done:
             if task.state != last_state:
                 last_state = task.state
-                print("** {} >>> {}".format(task.name, last_state))
+                logging.info('** {} >>> {}'.format(task.name, last_state))
             done = task.wait(2)
 
             if args.ssh and not ssh_tunneling_done:
@@ -224,7 +224,7 @@ def run_qarnot_mode(args) -> int:
                         ssh_forward_port = forward_list[0].forwarder_port
                         ssh_forward_host = forward_list[0].forwarder_host
                         cmd = f"ssh -o StrictHostKeyChecking=no root@{ssh_forward_host} -p {ssh_forward_port}"
-                        print(cmd)
+                        logging.info('cmd: {}'.format(cmd))
                         ssh_tunneling_done = True
 
 
@@ -233,11 +233,11 @@ def run_qarnot_mode(args) -> int:
         map(sys.stderr.write, task.fresh_stderr())
 
         if task.state == 'Failure':
-            print("** %s >>> Errors: %s" % (task.name, task.errors[0]))
+            logging.critical('** %s >>> Errors: %s' % (task.name, task.errors[0]))
             error_happened = True
 
     except Exception as e:
-            print("** %s >>> Errors: %s" % (task.name, e))
+            logging.critical('** %s >>> Errors: %s' % (task.name, e))
             error_happened = True
 
     finally:
@@ -253,10 +253,11 @@ def main() -> int:
                         choices=['local', 'qarnot', 'local_docker'], action='store', default='local')
     parser.add_argument('-v', '--verbosity', help='Verbosity level',
                         choices=['info', 'debug', 'trace'], action='store', default='info')
-    parser.add_argument('-t', '--task_name', help='qarnot task name', action='store', default="")
-    parser.add_argument('-c', '--container', help='container name', action='store', default='polluxio/pollux-payload-examples')
+    parser.add_argument('-a', '--task_name', help='qarnot task name', action='store', default="")
+    parser.add_argument('-i', '--image', help='docker image name', action='store', default='polluxio/pollux-payload-examples')
+    parser.add_argument('-t', '--image_tag', help='docker image tag', action='store', default='latest')
     parser.add_argument('-p', '--payload', help='payload path', action='store', default='/root/pollux-payload-test')
-    parser.add_argument('-i', '--input_bucket', help='input bucket name', action='store', default='pollux-qarnot-input')
+    parser.add_argument('-b', '--input_bucket', help='input bucket name', action='store', default='pollux-qarnot-input')
     parser.add_argument('-o', '--output_bucket', help='output bucket name', action='store', default='pollux-qarnot-output')
     parser.add_argument('-s', '--ssh', help='enable ssh access on Qarnot side', action='store_true')
     parser.add_argument('-k', '--clean_buckets',
