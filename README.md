@@ -6,6 +6,8 @@
 
 # Pollux
 
+![build](https://github.com/polluxio/pollux-payload/actions/workflows/test_local_mode.yml/badge.svg)
+
 **Pollux** is a Message Passing Cloud orchestrator designed to:
 
 - distribute and manage complex algorithms, including NP-Hard and Complete problems, across multiple Cloud-based machines.
