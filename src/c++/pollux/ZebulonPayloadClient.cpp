@@ -7,25 +7,45 @@
 
 namespace {
 
+using Messages = std::vector<pollux::PolluxMessage>;
+
+void transmit(
+  const ZebulonPayloadClient::Destinations& destinations,
+  int origin,
+  pollux::ZebulonPayload::Stub* stub,
+  const std::string& key,
+  const Messages& messages) {
+  grpc::ClientContext context;
+  pollux::PolluxMessageResponse response;
+  std::unique_ptr<grpc::ClientWriter<pollux::PolluxMessage> >
+    writer(stub->Transmit(&context, &response));
+  for (auto message: messages) {
+    message.set_origin(origin);
+    message.set_key(key);
+    for (auto destination: destinations) {
+      message.add_destinations(destination);
+    }
+    if (!writer->Write(message)) {
+      spdlog::error("Error while \"transmit\"");
+      break;
+    }
+  }
+  writer->WritesDone();
+  grpc::Status status = writer->Finish();
+  if (not status.ok()) {
+    spdlog::error("Error while \"transmit\": {}", status.error_message());
+    exit(-54);
+  }
+  spdlog::debug("Transmit::Response: {}", response.info());
+}
+
 void transmit(
   const ZebulonPayloadClient::Destinations& destinations,
   int origin,
   pollux::ZebulonPayload::Stub* stub,
   const std::string& key,
   pollux::PolluxMessage& message) {
-  message.set_origin(origin);
-  message.set_key(key);
-  for (auto destination: destinations) {
-    message.add_destinations(destination);
-  }
-  grpc::ClientContext context;
-  pollux::PolluxMessageResponse response;
-  grpc::Status status = stub->Transmit(&context, message, &response);
-  if (not status.ok()) {
-    spdlog::error("Error while \"transmit\": {}", status.error_message());
-    exit(-54);
-  }
-  spdlog::debug("Transmit::Response: {}", response.info());
+  transmit(destinations, origin, stub, key, message);
 }
 
 }

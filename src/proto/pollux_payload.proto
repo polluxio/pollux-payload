@@ -11,7 +11,7 @@ import "pollux.proto";
 
 //Pollux server from Payload side
 service PolluxPayload {
-  rpc Transmit(PolluxMessage) returns (PolluxMessageResponse) {}
+  rpc Transmit(stream PolluxMessage) returns (PolluxMessageResponse) {}
   rpc Start(PayloadStartMessage) returns (PolluxControlResponse) {}
   rpc Iterate(PayloadIterateMessage) returns (PolluxControlResponse) {}
   rpc Terminate(PayloadTerminateMessage) returns (EmptyResponse) {}
