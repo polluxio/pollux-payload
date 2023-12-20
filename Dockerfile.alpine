@@ -12,7 +12,7 @@ COPY thirdparty thirdparty
 COPY CMakeLists.txt .
 RUN cmake . && make VERBOSE=ON -j$(nproc)
 
-FROM pollux-alpine:latest AS polluxapp
+FROM pollux-alpine:latest AS pollux-payload-examples
 RUN apk add --no-cache grpc-dev openssh-server
 RUN mkdir /var/run/sshd
 RUN sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config

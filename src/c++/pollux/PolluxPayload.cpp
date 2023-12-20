@@ -18,6 +18,9 @@ void PolluxPayload::setControl(const pollux::PolluxControl& control) {
       case pollux::PolluxUserOptionValue::kStrValue:
         userOptions_[name] = value.strvalue(); 
         break;
+      case pollux::PolluxUserOptionValue::kBoolValue:
+        userOptions_[name] = value.boolvalue(); 
+        break;
       case pollux::PolluxUserOptionValue::kInt64Value:
         userOptions_[name] = value.int64value(); 
         break;
