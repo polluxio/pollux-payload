@@ -38,6 +38,7 @@ class ZebulonPayloadClient {
     void transmit(int destination, const std::string& key, const DoubleArray& values);
     void transmit(const std::string& key, const DoubleArray& values);
 
+    void polluxLog(const std::string& key, const std::string& value);
     void polluxReport(const std::string& key, const std::string& value);
     std::string getString() const;
 

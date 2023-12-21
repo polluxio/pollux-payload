@@ -10,7 +10,7 @@ package pollux;
 message PolluxVersion {
   enum Version {
     DUMMY = 0;
-    CURRENT = 6;
+    CURRENT = 7;
   }
   Version version = 1;
 }
@@ -53,6 +53,11 @@ message PolluxMessage {
     PolluxMessageInt64ArrayValue int64ArrayValue = 6;
     PolluxMessageDoubleArrayValue doubleArrayValue = 7;
   }
+}
+
+message PolluxLogMessage {
+  uint32 origin  = 1;
+  map<string, string> map = 2; 
 }
 
 message PolluxReportMessage {

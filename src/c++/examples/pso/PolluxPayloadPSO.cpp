@@ -94,7 +94,7 @@ class PolluxPayLoadPSO: public PolluxPayload {
         std::ostringstream message;
         message << "number of iterations: " << iterationsNum_
           << ", " << "function: " << functionOptionStr;
-        client->polluxReport("Options", message.str());
+        client->polluxLog("Options", message.str());
       }
 
       std::vector<double> real_solutions;
@@ -182,9 +182,9 @@ class PolluxPayLoadPSO: public PolluxPayload {
           func_(bestSolution_.first, bestSolution_.second);
           spdlog::info("{}", PLOG_INFO.str());
           {
-            std::ostringstream report;
-            report << "Particle " << i+1 << " value: " << value << " at: " << bestSolution_.first << ":" << bestSolution_.second;
-            client->polluxReport("NEW BEST", report.str());
+            std::ostringstream log;
+            log << "Particle " << i+1 << " value: " << value << " at: " << bestSolution_.first << ":" << bestSolution_.second;
+            client->polluxLog("NEW BEST", log.str());
           }
           particle_->SetBestGlobalPosition(bestSolution_);
         }

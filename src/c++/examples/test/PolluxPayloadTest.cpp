@@ -34,8 +34,8 @@ class PolluxPayloadTest: public PolluxPayload {
         int pick = rand() % getOtherIDs().size();
         int id = getOtherIDs()[pick];
 
-        spdlog::info("Reporting {}", nbMessages);
-        client->polluxReport("key", "value");
+        spdlog::info("Logging {}", nbMessages);
+        client->polluxLog("key", "value");
 
         int messageType = rand() % 4;
         switch(messageType) {

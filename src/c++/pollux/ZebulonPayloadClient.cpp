@@ -144,6 +144,21 @@ void ZebulonPayloadClient::transmit(const std::string& key, const DoubleArray& v
   transmit(Destinations(), key, values);
 }
 
+void ZebulonPayloadClient::polluxLog(const std::string& key, const std::string& value) {
+  grpc::ClientContext context;
+  pollux::PolluxLogMessage message;
+  message.set_origin(id_);
+  (*message.mutable_map())[key] = value;
+
+  pollux::PolluxStandardResponse response;
+  grpc::Status status = stub_->PolluxLog(&context, message, &response);
+  if (not status.ok()) {
+    spdlog::error("Error while sending \"polluxLog\": {}", status.error_message());
+    exit(-54);
+  }
+  spdlog::debug("PolluxLog: {}", response.info());
+}
+
 void ZebulonPayloadClient::polluxReport(const std::string& key, const std::string& value) {
   grpc::ClientContext context;
   pollux::PolluxReportMessage message;
