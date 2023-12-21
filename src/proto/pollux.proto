@@ -18,7 +18,8 @@ message PolluxVersion {
 message PolluxUserOptionValue {
   oneof value {
     string strValue = 1;
-    int64 int64Value = 2;
+    bool boolValue = 2;
+    int64 int64Value = 3;
   }
 }
 
