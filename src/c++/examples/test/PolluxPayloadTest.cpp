@@ -33,9 +33,9 @@ class PolluxPayloadTest: public PolluxPayload {
         std::this_thread::sleep_for(5000ms);
         int pick = rand() % getOtherIDs().size();
         int id = getOtherIDs()[pick];
+        ZebulonPayloadClient::NodeStatus status = client->getNodeStatus(id);
 
         spdlog::info("Logging {}", nbMessages);
-        client->polluxLog("key", "value");
 
         int messageType = rand() % 4;
         switch(messageType) {
@@ -44,6 +44,7 @@ class PolluxPayloadTest: public PolluxPayload {
               //random int
               int value = rand()%std::numeric_limits<int>::max();
               client->transmit(id, "int64", (int64_t)value);
+              client->polluxLog(std::to_string(id), std::to_string(value));
               break;
             }
           case 1:
@@ -51,16 +52,19 @@ class PolluxPayloadTest: public PolluxPayload {
               //random uint
               int value = rand()%std::numeric_limits<int>::max();
               client->transmit(id, "uint64", (uint64_t)value);
+              client->polluxLog(std::to_string(id), std::to_string(value));
               break;
             }
           case 2:
             {
               //int array
               client->transmit(id, "int64array", ZebulonPayloadClient::Int64Array({0, 10, 200, 3000, 40000, 500000}));
+              client->polluxLog(std::to_string(id), "int64array");
               break;
             }
           default:
             client->transmit(id, "string", "value");
+            client->polluxLog(std::to_string(id), "value");
             break;
 
         }
