@@ -72,6 +72,7 @@ class PolluxPayloadTest: public PolluxPayload {
       }
       if (isSynchronized()) {
         if (iteration_ > maxIterations_) {
+          client->polluxReport("iterations", std::to_string(iteration_));
           client->sendPayloadLoopEnd(iteration_++);
         } else {
           client->sendPayloadLoopReadyForNextIteration(iteration_++);

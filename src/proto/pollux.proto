@@ -66,6 +66,21 @@ message PolluxReportMessage {
   map<string, string> map = 2; 
 }
 
+message NodeStatusMessage {
+  uint32 nodeID = 1;
+}
+
+message NodeStatusResponse {
+  enum NodeStatus {
+    UNKNOWN = 0;
+    RUNNING = 1;
+    DONE = 2;
+    TERMINATED = 3;
+    FAILURE = 4;
+  }
+  NodeStatus status = 1;
+};
+
 message PolluxMessageResponse {
   string info = 1;
 }

@@ -28,6 +28,22 @@ void transmit(
   spdlog::debug("Transmit::Response: {}", response.info());
 }
 
+ZebulonPayloadClient::NodeStatus grpcNodeStatusToNodeStatus(pollux::NodeStatusResponse_NodeStatus grpcStatus) {
+  switch (grpcStatus) {
+    case pollux::NodeStatusResponse_NodeStatus_UNKNOWN:
+      return ZebulonPayloadClient::NodeStatus::Unknown;
+    case pollux::NodeStatusResponse_NodeStatus_RUNNING:
+      return ZebulonPayloadClient::NodeStatus::Running;
+    case pollux::NodeStatusResponse_NodeStatus_DONE:
+      return ZebulonPayloadClient::NodeStatus::Done;
+    case pollux::NodeStatusResponse_NodeStatus_TERMINATED:
+      return ZebulonPayloadClient::NodeStatus::Terminated;
+    case pollux::NodeStatusResponse_NodeStatus_FAILURE:
+      return ZebulonPayloadClient::NodeStatus::Failure;
+  }
+  return ZebulonPayloadClient::NodeStatus::InternalFailure;
+}
+
 }
 
 ZebulonPayloadClient::ZebulonPayloadClient(std::shared_ptr<grpc::Channel> channel, int id):
@@ -172,6 +188,38 @@ void ZebulonPayloadClient::polluxReport(const std::string& key, const std::strin
     exit(-54);
   }
   spdlog::debug("PolluxReport: {}", response.info());
+}
+
+ZebulonPayloadClient::NodeStatus::NodeStatus(const NodeStatusEnum& nodeStatusEnum):
+  nodeStatusEnum_(nodeStatusEnum) 
+{}
+
+std::string ZebulonPayloadClient::NodeStatus::getString() const {
+  switch (nodeStatusEnum_) {
+    case NodeStatus::Unknown: return "Unknown";
+    case NodeStatus::Running: return "Running";
+    case NodeStatus::Done: return "Done";
+    case NodeStatus::Terminated: return "Terminated";
+    case NodeStatus::Failure: return "Failure";
+    case NodeStatus::InternalFailure: return "InternalFailure";
+  }
+  return "EnumError";
+}
+
+ZebulonPayloadClient::NodeStatus ZebulonPayloadClient::getNodeStatus(unsigned nodeID) const {
+  grpc::ClientContext context;
+  pollux::NodeStatusMessage message;
+  message.set_nodeid(nodeID);
+
+  pollux::NodeStatusResponse response;
+  grpc::Status status = stub_->GetNodeStatus(&context, message, &response);
+  if (not status.ok()) {
+    spdlog::error("Error while sending \"getNodeStatus\": {}", status.error_message());
+    exit(-54);
+  }
+  ZebulonPayloadClient::NodeStatus nodeStatus = grpcNodeStatusToNodeStatus(response.status());
+  spdlog::debug("getNodeStatus: {}", nodeStatus.getString());
+  return nodeStatus;
 }
 
 std::string ZebulonPayloadClient::getString() const {

@@ -26,6 +26,7 @@ service ZebulonPayload {
   rpc Transmit(PolluxMessage) returns (PolluxMessageResponse) {}
   rpc PolluxReport(PolluxReportMessage) returns (PolluxStandardResponse) {}
   rpc PolluxLog(PolluxLogMessage) returns (PolluxStandardResponse) {}
+  rpc GetNodeStatus(NodeStatusMessage) returns (NodeStatusResponse) {}
 }
 
 message PayloadReadyMessage {
