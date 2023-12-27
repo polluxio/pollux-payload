@@ -33,9 +33,9 @@ class PolluxPayloadTest: public PolluxPayload {
         std::this_thread::sleep_for(5000ms);
         int pick = rand() % getOtherIDs().size();
         int id = getOtherIDs()[pick];
-        ZebulonPayloadClient::NodeStatus status = client->getNodeStatus(id);
-
         spdlog::info("Logging {}", nbMessages);
+        ZebulonPayloadClient::NodeStatus status = client->getNodeStatus(id);
+        spdlog::info("Node {} status: {}", id, status.getString());
 
         int messageType = rand() % 4;
         switch(messageType) {
