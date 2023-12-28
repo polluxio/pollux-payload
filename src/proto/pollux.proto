@@ -29,11 +29,17 @@ message PolluxControl {
     DEBUG = 1;
     TRACE = 2;
   }
+  enum PayloadRunMode {
+    DEFAULT = 0;
+    GDB = 1;
+    VALGRIND = 2;
+  }
   VerbosityLevel verbosity = 1;
-  repeated uint32 partIDs = 2;
-  uint32 transmissionTimeout = 3;
-  bool synchronized = 4;
-  map<string, PolluxUserOptionValue> userOptions = 5; 
+  PayloadRunMode runMode = 2;
+  repeated uint32 partIDs = 3;
+  uint32 transmissionTimeout = 4;
+  bool synchronized = 5;
+  map<string, PolluxUserOptionValue> userOptions = 6; 
 }
 
 message PolluxMessageInt64ArrayValue {

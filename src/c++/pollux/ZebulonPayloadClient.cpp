@@ -40,6 +40,8 @@ ZebulonPayloadClient::NodeStatus grpcNodeStatusToNodeStatus(pollux::NodeStatusRe
       return ZebulonPayloadClient::NodeStatus::Terminated;
     case pollux::NodeStatusResponse_NodeStatus_FAILURE:
       return ZebulonPayloadClient::NodeStatus::Failure;
+    default:
+      break;
   }
   return ZebulonPayloadClient::NodeStatus::InternalFailure;
 }
