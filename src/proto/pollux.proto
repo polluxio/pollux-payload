@@ -32,7 +32,8 @@ message PolluxControl {
   enum PayloadRunMode {
     DEFAULT = 0;
     GDB = 1;
-    VALGRIND = 2;
+    GDB_TERMINAL = 2;
+    VALGRIND = 3;
   }
   VerbosityLevel verbosity = 1;
   PayloadRunMode runMode = 2;
