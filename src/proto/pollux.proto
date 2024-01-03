@@ -34,6 +34,7 @@ message PolluxControl {
     GDB = 1;
     GDB_TERMINAL = 2;
     VALGRIND = 3;
+    VALGRIND_MEMCHECK = 4;
   }
   VerbosityLevel verbosity = 1;
   PayloadRunMode runMode = 2;
