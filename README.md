@@ -282,4 +282,49 @@ docker push mydockerrepository/my-pollux-payload
 You should then be able to run your own payload by referencing it with the
 '-p' switch of the **Pollux** launcher.
 
+### Runtime configuration
+The runtime behavior can be controlled using a pollux.yaml file.
+
+#### Example 1: Launching Multiple Identical Payloads
+The following example launches five payloads, all executing the same command with the same options:
+```yaml
+synchronized: true    # Enable synchronized mode
+executor: local       # Run payloads in local mode
+
+# Default command for all payloads
+global_payload_command: build/src/c++/examples/test/pollux-payload-test
+
+payloads_nb: 5        # Number of payloads to launch
+
+# Options applied to all payloads
+global_user_options:
+  nb_iterations:
+    type: int
+    value: 2
+```
+
+#### Example 2: Launching Payloads with Different Options
+
+This example runs two payloads, both using the same command but with different user options:
+```yaml
+synchronized: true
+executor: local
+
+payloads:
+  1:  
+    command: build/src/c++/examples/test/pollux-payload-test
+    user_options:
+      user0:
+        type: int
+        value: 2
+    
+  2:  
+    command: build/src/c++/examples/test/pollux-payload-test
+    user_options:
+      user0:
+        type: int
+        value: 3
+```
+
+
 <div align="right">[ <a href="#pollux">↑ Back to top ↑</a> ]</div>
