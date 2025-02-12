@@ -1,4 +1,8 @@
 synchronized: true
 executor: local
-payload: build/src/c++/examples/test/pollux-payload-test
+global_payload_command: build/src/c++/examples/test/pollux-payload-test
 payloads_nb: 5
+global_user_options:
+  nb_iterations:
+    type: int
+    value: 2
