@@ -6,5 +6,5 @@ set (sources
 
 add_library(pollux ${sources})
 
-target_link_libraries(pollux pollux_grpc gpr spdlog::spdlog argparse)
+target_link_libraries(pollux pollux_grpc gpr absl_synchronization spdlog::spdlog argparse)
 target_include_directories(pollux PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
