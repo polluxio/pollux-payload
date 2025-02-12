@@ -42,10 +42,18 @@ jobs:
     - name: Set pollux executable permissions
       run: chmod +x ${{github.workspace}}/pollux; chmod +x ${{github.workspace}}/zebulon
 
-    - name: Copy pollux yaml file
+    - name: Copy local test to pollux yaml file
       run: cp ${{github.workspace}}/regress/local_test.yaml pollux.yaml
 
-    - name: Test
+    - name: Test_local
+      env:
+        POLLUX_INSTALL: ${{github.workspace}}
+      run: ${POLLUX_INSTALL}/pollux 
+
+    - name: Copy different payloads test to pollux yaml file
+      run: cp ${{github.workspace}}/regress/different_payloads.yaml pollux.yaml
+
+    - name: Test_different_payloads
       env:
         POLLUX_INSTALL: ${{github.workspace}}
       run: ${POLLUX_INSTALL}/pollux 

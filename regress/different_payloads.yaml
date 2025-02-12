@@ -1,0 +1,17 @@
+synchronized: true
+executor: local
+payloads:
+  1: 
+    command: build/src/c++/examples/test/pollux-payload-test
+    user_options:
+      user0:
+        type: int
+        value: 2
+      
+  2:
+    command: build/src/c++/examples/test/pollux-payload-test
+    user_options:
+      user0:
+        type: int
+        value: 3
+
