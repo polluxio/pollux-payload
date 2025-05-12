@@ -13,6 +13,7 @@ void transmit(
   pollux::ZebulonPayload::Stub* stub,
   const std::string& key,
   pollux::PolluxMessage& message) {
+  const auto start{std::chrono::steady_clock::now()};
   message.set_origin(origin);
   message.set_key(key);
   for (auto destination: destinations) {
@@ -25,7 +26,9 @@ void transmit(
     spdlog::error("Error while \"transmit\": {}", status.error_message());
     exit(-54);
   }
-  spdlog::debug("Transmit::Response: {}", response.info());
+  const auto end{std::chrono::steady_clock::now()};
+  const std::chrono::duration<double> elapsed_seconds{end - start};
+  spdlog::debug("Transmit::Response: {} in {:.6f} seconds", response.info(), elapsed_seconds.count());
 }
 
 ZebulonPayloadClient::NodeStatus grpcNodeStatusToNodeStatus(pollux::NodeStatusResponse_NodeStatus grpcStatus) {
