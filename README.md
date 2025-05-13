@@ -285,6 +285,13 @@ You should then be able to run your own payload by referencing it with the
 ### Runtime configuration
 The runtime behavior can be controlled using a pollux.yaml file.
 
+#### Global options
+##### Verbose mode
+Verbose mode can be set to info (default), debug or trace.
+```yaml
+verbose: trace # will set verbose to trace (can be info, debug or trace).
+```
+
 #### Example 1: Launching Multiple Identical Payloads
 The following example launches five payloads, all executing the same command with the same options:
 ```yaml
